@@ -927,14 +927,44 @@
                     
                     // 方案2：通过RSS Feed + CORS代理获取（无需后端）
                     try {
-                        // 使用公共CORS代理服务访问RSS Feed
-                        const corsProxy = 'https://api.allorigins.win/raw?url=';
+                        // 使用公共CORS代理服务访问RSS Feed（多个备选）
+                        const corsProxies = [
+                            'https://api.allorigins.win/raw?url=',
+                            'https://cors-anywhere.herokuapp.com/',
+                            'https://api.codetabs.com/v1/proxy?quest='
+                        ];
+                        
+                        // 辅助函数：尝试多个代理
+                        const fetchWithProxy = async (url, sourceName) => {
+                            for (let i = 0; i < corsProxies.length; i++) {
+                                const proxy = corsProxies[i];
+                                try {
+                                    console.log(`🔄 ${sourceName}: 尝试代理 ${i + 1}/${corsProxies.length}...`);
+                                    const proxyUrl = proxy === 'https://api.codetabs.com/v1/proxy?quest=' 
+                                        ? proxy + encodeURIComponent(url)
+                                        : proxy + encodeURIComponent(url);
+                                    const response = await axios.get(proxyUrl, { 
+                                        timeout: 15000 // 增加到15秒
+                                    });
+                                    console.log(`✅ ${sourceName}: 代理 ${i + 1} 成功`);
+                                    return response.data;
+                                } catch (e) {
+                                    if (i < corsProxies.length - 1) {
+                                        console.log(`⚠️ ${sourceName}: 代理 ${i + 1} 失败 (${e.message})，尝试下一个...`);
+                                    } else {
+                                        console.log(`❌ ${sourceName}: 所有代理都失败`);
+                                    }
+                                    continue;
+                                }
+                            }
+                            throw new Error('所有代理都失败');
+                        };
                         
                         // 36氪RSS（科技创投）
                         try {
-                            const rss36kr = await axios.get(corsProxy + encodeURIComponent('https://36kr.com/feed'), { timeout: 5000 });
+                            const rss36krData = await fetchWithProxy('https://36kr.com/feed', '36氪');
                             const parser = new DOMParser();
-                            const xmlDoc = parser.parseFromString(rss36kr.data, 'text/xml');
+                            const xmlDoc = parser.parseFromString(rss36krData, 'text/xml');
                             const items = xmlDoc.querySelectorAll('item');
                             
                             items.forEach(item => {
@@ -966,9 +996,9 @@
                         
                         // 虎嗅RSS（商业分析）
                         try {
-                            const rssHuxiu = await axios.get(corsProxy + encodeURIComponent('https://www.huxiu.com/rss/0.xml'), { timeout: 5000 });
+                            const rssHuxiuData = await fetchWithProxy('https://www.huxiu.com/rss/0.xml', '虎嗅');
                             const parser = new DOMParser();
-                            const xmlDoc = parser.parseFromString(rssHuxiu.data, 'text/xml');
+                            const xmlDoc = parser.parseFromString(rssHuxiuData, 'text/xml');
                             const items = xmlDoc.querySelectorAll('item');
                             
                             items.forEach(item => {
@@ -999,9 +1029,9 @@
                         
                         // 钛媒体RSS（科技媒体）
                         try {
-                            const rssTmt = await axios.get(corsProxy + encodeURIComponent('https://www.tmtpost.com/rss.xml'), { timeout: 5000 });
+                            const rssTmtData = await fetchWithProxy('https://www.tmtpost.com/rss.xml', '钛媒体');
                             const parser = new DOMParser();
-                            const xmlDoc = parser.parseFromString(rssTmt.data, 'text/xml');
+                            const xmlDoc = parser.parseFromString(rssTmtData, 'text/xml');
                             const items = xmlDoc.querySelectorAll('item');
                             
                             items.forEach(item => {
@@ -1032,9 +1062,9 @@
                         
                         // 界面新闻RSS（商业新闻）
                         try {
-                            const rssJiemian = await axios.get(corsProxy + encodeURIComponent('https://www.jiemian.com/rss.xml'), { timeout: 5000 });
+                            const rssJiemianData = await fetchWithProxy('https://www.jiemian.com/rss.xml', '界面新闻');
                             const parser = new DOMParser();
-                            const xmlDoc = parser.parseFromString(rssJiemian.data, 'text/xml');
+                            const xmlDoc = parser.parseFromString(rssJiemianData, 'text/xml');
                             const items = xmlDoc.querySelectorAll('item');
                             
                             items.forEach(item => {
