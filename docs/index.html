@@ -519,33 +519,99 @@
                     
                     this.currentReport.news_items.forEach(news => {
                         const text = (news.title + ' ' + (news.summary || '')).toLowerCase();
+                        const originalText = news.title + ' ' + (news.summary || '');
                         
-                        // 公司动态关键词：具体公司名、CEO、并购、融资、财报、IPO
-                        const companyKeywords = ['starbucks', 'luckin', 'nestle', 'costa', 'tim hortons', 'dunkin', 'peet', 'blue bottle', 
-                                                'ceo', 'merger', 'acquisition', 'invest', 'ipo', 'earnings', 'revenue', 'profit', 
-                                                'expansion', 'opens', 'closes', 'launch', 'announces', 'strategy', 'scandal', 'comeback'];
+                        // 公司动态关键词：具体公司名（中英文）、CEO、并购、融资、财报、IPO
+                        const companyKeywords = [
+                            // 英文公司名
+                            'starbucks', 'luckin', 'nestle', 'costa', 'tim hortons', 'dunkin', 'peet', 'blue bottle', 'lavazza', 'illy',
+                            // 中文公司名
+                            '星巴克', '瑞幸', '雀巢', 'costa', 'manner', 'seesaw', 'm stand', 'tims', '挪瓦', 'manner coffee',
+                            '连咖啡', '三顿半', '永璞', '隅田川', '时萃', 'fisheye', '鱼眼咖啡',
+                            // 公司行为关键词（英文）
+                            'ceo', 'merger', 'acquisition', 'invest', 'ipo', 'earnings', 'revenue', 'profit', 
+                            'expansion', 'opens', 'closes', 'launch', 'announces', 'strategy', 'scandal', 'comeback',
+                            'quarterly', 'financial', 'funding', 'round', 'valuation', 'partnership', 'cooperation',
+                            // 公司行为关键词（中文）
+                            '宣布', '发布', '财报', '营收', '利润', '融资', '投资', '并购', '收购', 'ipo', '上市',
+                            '开店', '关店', '扩张', '战略', '合作', '推出', '上线', '发布', 'ceo', '总裁', '董事长',
+                            '门店数', '业绩', '增长', '亏损', '盈利', '估值', '轮融资', '战略融资', 'a轮', 'b轮', 'c轮'
+                        ];
                         
                         // 行业趋势关键词：报告、研究、趋势、增长、技术、创新
-                        const industryKeywords = ['industry', 'trend', 'growth', 'report', 'study', 'research', 'forecast', 'market size',
-                                                'innovation', 'technology', 'digital', 'sustainability', 'third wave', 'specialty', 
-                                                'economics', 'business model', 'future', 'evolution', 'transformation'];
+                        const industryKeywords = [
+                            // 英文关键词
+                            'industry', 'trend', 'growth', 'report', 'study', 'research', 'forecast', 'market size',
+                            'innovation', 'technology', 'digital', 'sustainability', 'third wave', 'specialty', 
+                            'economics', 'business model', 'future', 'evolution', 'transformation', 'analysis',
+                            'outlook', 'perspective', 'development', 'progress', 'breakthrough',
+                            // 中文关键词
+                            '行业', '趋势', '报告', '研究', '分析', '预测', '展望', '发展', '增长', '市场规模',
+                            '技术创新', '数字化转型', '可持续发展', '商业模式', '未来', '演变', '变革',
+                            '行业报告', '市场研究', '行业分析', '发展趋势', '行业前景', '市场前景',
+                            '行业数据', '统计', '调研', '白皮书', '蓝皮书'
+                        ];
                         
                         // 市场变化关键词：消费者、需求、价格、供应、政策、法规
-                        const marketKeywords = ['consumer', 'demand', 'preference', 'price', 'cost', 'supply', 'shortage', 'labor',
-                                              'regulation', 'policy', 'climate', 'weather', 'crop', 'generation', 'gen z', 'millennial',
-                                              'shift', 'change', 'sales', 'dominates', 'plant-based', 'alternative'];
+                        const marketKeywords = [
+                            // 英文关键词
+                            'consumer', 'demand', 'preference', 'price', 'cost', 'supply', 'shortage', 'labor',
+                            'regulation', 'policy', 'climate', 'weather', 'crop', 'generation', 'gen z', 'millennial',
+                            'shift', 'change', 'sales', 'dominates', 'plant-based', 'alternative', 'purchasing',
+                            'behavior', 'spending', 'budget', 'affordability', 'competition', 'market share',
+                            // 中文关键词
+                            '消费者', '需求', '偏好', '价格', '成本', '供应', '短缺', '劳动力', '人工',
+                            '政策', '法规', '监管', '气候', '天气', '作物', 'z世代', '千禧一代', '95后', '00后',
+                            '变化', '转变', '销售', '市场份额', '竞争', '购买', '消费', '支出', '预算',
+                            '消费习惯', '消费趋势', '消费升级', '消费降级', '价格战', '促销', '优惠',
+                            '政策法规', '监管政策', '行业政策', '市场政策', '消费政策'
+                        ];
                         
                         let companyScore = 0, industryScore = 0, marketScore = 0;
                         
-                        companyKeywords.forEach(kw => { if(text.includes(kw)) companyScore++; });
-                        industryKeywords.forEach(kw => { if(text.includes(kw)) industryScore++; });
-                        marketKeywords.forEach(kw => { if(text.includes(kw)) marketScore++; });
+                        // 优先检查公司名（权重更高）
+                        const companyNames = ['星巴克', '瑞幸', 'luckin', 'starbucks', 'manner', '雀巢', 'nestle', 
+                                             'costa', 'tims', 'seesaw', 'm stand', '挪瓦', '三顿半', '永璞'];
+                        const hasCompanyName = companyNames.some(name => 
+                            originalText.includes(name) || text.includes(name.toLowerCase())
+                        );
+                        if (hasCompanyName) {
+                            companyScore += 5; // 公司名匹配给予高分
+                        }
+                        
+                        // 检查公司行为关键词
+                        companyKeywords.forEach(kw => { 
+                            if(text.includes(kw.toLowerCase()) || originalText.includes(kw)) {
+                                companyScore += 2;
+                            }
+                        });
+                        
+                        // 检查行业趋势关键词
+                        industryKeywords.forEach(kw => { 
+                            if(text.includes(kw.toLowerCase()) || originalText.includes(kw)) {
+                                industryScore += 1;
+                            }
+                        });
+                        
+                        // 检查市场变化关键词
+                        marketKeywords.forEach(kw => { 
+                            if(text.includes(kw.toLowerCase()) || originalText.includes(kw)) {
+                                marketScore += 1;
+                            }
+                        });
                         
                         // 根据得分最高的分类
                         const max = Math.max(companyScore, industryScore, marketScore);
                         if (max === 0) {
-                            // 默认归为行业趋势
-                            industry.push(news);
+                            // 如果所有得分都是0，根据标题判断
+                            if (news.title.includes('报告') || news.title.includes('研究') || news.title.includes('分析')) {
+                                industry.push(news);
+                            } else if (news.title.includes('价格') || news.title.includes('消费') || news.title.includes('政策')) {
+                                market.push(news);
+                            } else {
+                                // 默认归为公司动态（因为大多数新闻都是关于具体公司的）
+                                company.push(news);
+                            }
                         } else if (companyScore === max) {
                             company.push(news);
                         } else if (industryScore === max) {
