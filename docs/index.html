@@ -686,6 +686,47 @@
                     return cleaned;
                 },
                 
+                // 生成简洁摘要（1-2句话）
+                generateSummary(title, description) {
+                    if (!description || description.trim() === '') {
+                        return title;
+                    }
+                    
+                    // 移除作者编辑信息
+                    let text = description.replace(/^作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?\s*/i, '');
+                    text = text.replace(/^编辑\s*[|：:]\s*[^\s|：:]+\s*/i, '');
+                    text = text.trim();
+                    
+                    // 如果文本很短，直接返回
+                    if (text.length <= 100) {
+                        return text;
+                    }
+                    
+                    // 按句号、问号、感叹号分割
+                    const sentences = text.split(/[。！？.!?]/).filter(s => s.trim().length > 0);
+                    
+                    if (sentences.length === 0) {
+                        // 如果没有句号，按逗号分割
+                        const parts = text.split(/[，,]/).filter(s => s.trim().length > 0);
+                        if (parts.length > 0) {
+                            return parts[0].trim() + (parts.length > 1 ? '，' + parts[1].trim() : '');
+                        }
+                        return text.substring(0, 100) + '...';
+                    }
+                    
+                    // 取前1-2句话
+                    if (sentences.length === 1) {
+                        return sentences[0].trim();
+                    } else {
+                        // 取前两句话，确保总长度不超过150字
+                        let summary = sentences[0].trim() + '。';
+                        if (sentences[1] && (summary.length + sentences[1].trim().length) < 150) {
+                            summary += sentences[1].trim() + '。';
+                        }
+                        return summary;
+                    }
+                },
+                
                 // 获取模拟数据（用于展示效果）
                 getMockNewsData() {
                     const today = new Date().toISOString().split('T')[0];
@@ -1073,25 +1114,32 @@
                                 if (!title) return;
                                 totalItems++;
                                 
-                                // 扩展关键词过滤（包含更多相关词）
+                                // 只过滤咖啡行业相关关键词（移除奶茶、饮品等不直接相关的词）
                                 const fullText = (title + ' ' + description).toLowerCase();
-                                const keywords = [
-                                    '咖啡', '奶茶', '星巴克', '瑞幸', 'luckin', 'starbucks',
+                                const coffeeKeywords = [
+                                    // 咖啡品牌
+                                    '咖啡', '星巴克', '瑞幸', 'luckin', 'starbucks',
                                     'manner', 'seesaw', 'costa', '雀巢', 'nestle',
-                                    '饮品', '新消费', '连锁', '门店', '开店', '融资',
-                                    'coffee', 'tea', 'beverage', 'cafe', 'shop', 'chain'
+                                    'blue bottle', 'peet', 'tims', '挪瓦',
+                                    // 咖啡相关词
+                                    'coffee', 'cafe', 'espresso', 'latte', 'cappuccino',
+                                    '咖啡店', '咖啡厅', '咖啡豆', '咖啡机', '咖啡师',
+                                    '咖啡市场', '咖啡行业', '咖啡消费', '咖啡品牌'
                                 ];
                                 
-                                const hasKeyword = keywords.some(keyword => fullText.includes(keyword));
+                                const hasCoffeeKeyword = coffeeKeywords.some(keyword => fullText.includes(keyword));
                                 
-                                if (hasKeyword) {
+                                if (hasCoffeeKeyword) {
                                     matchedItems++;
+                                    // 生成简洁摘要（1-2句话）
+                                    const summary = this.generateSummary(title, description);
+                                    
                                     allNews.push({
                                         title: title,
                                         url: link,
                                         source: '36氪',
                                         publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                                        summary: description.substring(0, 150) || title
+                                        summary: summary
                                     });
                                 }
                             });
@@ -1131,27 +1179,35 @@
                                 title = this.cleanText(title);
                                 description = this.cleanText(description);
                                 
+                                // 移除描述开头的作者和编辑信息
+                                description = description.replace(/^作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?\s*/i, '');
+                                description = description.replace(/^编辑\s*[|：:]\s*[^\s|：:]+\s*/i, '');
+                                
                                 if (!title) return;
                                 totalItems++;
                                 
                                 const fullText = (title + ' ' + description).toLowerCase();
-                                const keywords = [
-                                    '咖啡', '奶茶', '星巴克', '瑞幸', 'luckin', 'starbucks',
+                                const coffeeKeywords = [
+                                    '咖啡', '星巴克', '瑞幸', 'luckin', 'starbucks',
                                     'manner', 'seesaw', 'costa', '雀巢', 'nestle',
-                                    '饮品', '新消费', '连锁', '门店', '开店', '融资',
-                                    'coffee', 'tea', 'beverage', 'cafe', 'shop', 'chain'
+                                    'blue bottle', 'peet', 'tims', '挪瓦',
+                                    'coffee', 'cafe', 'espresso', 'latte', 'cappuccino',
+                                    '咖啡店', '咖啡厅', '咖啡豆', '咖啡机', '咖啡师',
+                                    '咖啡市场', '咖啡行业', '咖啡消费', '咖啡品牌'
                                 ];
                                 
-                                const hasKeyword = keywords.some(keyword => fullText.includes(keyword));
+                                const hasCoffeeKeyword = coffeeKeywords.some(keyword => fullText.includes(keyword));
                                 
-                                if (hasKeyword) {
+                                if (hasCoffeeKeyword) {
                                     matchedItems++;
+                                    const summary = this.generateSummary(title, description);
+                                    
                                     allNews.push({
                                         title: title,
                                         url: link,
                                         source: '虎嗅',
                                         publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                                        summary: description.substring(0, 150) || title
+                                        summary: summary
                                     });
                                 }
                             });
@@ -1191,24 +1247,32 @@
                                 if (!title) return;
                                 totalItems++;
                                 
+                                // 移除描述开头的作者和编辑信息
+                                description = description.replace(/^作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?\s*/i, '');
+                                description = description.replace(/^编辑\s*[|：:]\s*[^\s|：:]+\s*/i, '');
+                                
                                 const fullText = (title + ' ' + description).toLowerCase();
-                                const keywords = [
-                                    '咖啡', '奶茶', '星巴克', '瑞幸', 'luckin', 'starbucks',
+                                const coffeeKeywords = [
+                                    '咖啡', '星巴克', '瑞幸', 'luckin', 'starbucks',
                                     'manner', 'seesaw', 'costa', '雀巢', 'nestle',
-                                    '饮品', '新消费', '连锁', '门店', '开店', '融资',
-                                    'coffee', 'tea', 'beverage', 'cafe', 'shop', 'chain'
+                                    'blue bottle', 'peet', 'tims', '挪瓦',
+                                    'coffee', 'cafe', 'espresso', 'latte', 'cappuccino',
+                                    '咖啡店', '咖啡厅', '咖啡豆', '咖啡机', '咖啡师',
+                                    '咖啡市场', '咖啡行业', '咖啡消费', '咖啡品牌'
                                 ];
                                 
-                                const hasKeyword = keywords.some(keyword => fullText.includes(keyword));
+                                const hasCoffeeKeyword = coffeeKeywords.some(keyword => fullText.includes(keyword));
                                 
-                                if (hasKeyword) {
+                                if (hasCoffeeKeyword) {
                                     matchedItems++;
+                                    const summary = this.generateSummary(title, description);
+                                    
                                     allNews.push({
                                         title: title,
                                         url: link,
                                         source: '钛媒体',
                                         publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                                        summary: description.substring(0, 150) || title
+                                        summary: summary
                                     });
                                 }
                             });
@@ -1248,24 +1312,32 @@
                                 if (!title) return;
                                 totalItems++;
                                 
+                                // 移除描述开头的作者和编辑信息
+                                description = description.replace(/^作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?\s*/i, '');
+                                description = description.replace(/^编辑\s*[|：:]\s*[^\s|：:]+\s*/i, '');
+                                
                                 const fullText = (title + ' ' + description).toLowerCase();
-                                const keywords = [
-                                    '咖啡', '奶茶', '星巴克', '瑞幸', 'luckin', 'starbucks',
+                                const coffeeKeywords = [
+                                    '咖啡', '星巴克', '瑞幸', 'luckin', 'starbucks',
                                     'manner', 'seesaw', 'costa', '雀巢', 'nestle',
-                                    '饮品', '新消费', '连锁', '门店', '开店', '融资',
-                                    'coffee', 'tea', 'beverage', 'cafe', 'shop', 'chain'
+                                    'blue bottle', 'peet', 'tims', '挪瓦',
+                                    'coffee', 'cafe', 'espresso', 'latte', 'cappuccino',
+                                    '咖啡店', '咖啡厅', '咖啡豆', '咖啡机', '咖啡师',
+                                    '咖啡市场', '咖啡行业', '咖啡消费', '咖啡品牌'
                                 ];
                                 
-                                const hasKeyword = keywords.some(keyword => fullText.includes(keyword));
+                                const hasCoffeeKeyword = coffeeKeywords.some(keyword => fullText.includes(keyword));
                                 
-                                if (hasKeyword) {
+                                if (hasCoffeeKeyword) {
                                     matchedItems++;
+                                    const summary = this.generateSummary(title, description);
+                                    
                                     allNews.push({
                                         title: title,
                                         url: link,
                                         source: '界面新闻',
                                         publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                                        summary: description.substring(0, 150) || title
+                                        summary: summary
                                     });
                                 }
                             });
@@ -1366,15 +1438,15 @@
                         console.log('📦 API返回结果数:', totalResults);
                         
                         if (response.data.response && response.data.response.results && response.data.response.results.length > 0) {
-                            // 行业相关关键词（用于二次过滤）
+                            // 行业相关关键词（用于二次过滤）- 只保留咖啡相关
                             const industryKeywords = [
                                 // 咖啡相关
                                 'coffee', 'cafe', 'espresso', 'latte', 'cappuccino', 'mocha', 'americano',
                                 'starbucks', 'luckin', 'costa', 'nestle', 'barista', 'roast', 'bean',
-                                // 奶茶相关
-                                'tea', 'bubble tea', 'boba', 'milk tea', 'heytea', 'nayuki', 'tapioca',
-                                // 行业词
-                                'shop', 'chain', 'store', 'beverage', 'drink', 'industry', 'market', 'brand'
+                                'manner', 'seesaw', 'blue bottle', 'peet', 'tims',
+                                // 咖啡行业词
+                                'coffee shop', 'coffee chain', 'coffee store', 'coffee industry', 
+                                'coffee market', 'coffee brand', 'coffee consumption'
                             ];
                             
                             // 排除无关关键词
@@ -1408,14 +1480,16 @@
                                 .map(article => {
                                     // 清理HTML实体编码
                                     const title = this.cleanText(article.webTitle || '');
-                                    const summary = this.cleanText(article.fields?.trailText || article.webTitle || '');
+                                    const description = this.cleanText(article.fields?.trailText || article.webTitle || '');
+                                    // 生成简洁摘要（1-2句话）
+                                    const summary = this.generateSummary(title, description);
                                     
                                     return {
                                         title: title,
                                         url: article.webUrl,
                                         source: 'The Guardian',
                                         publish_date: article.webPublicationDate.split('T')[0],
-                                        summary: summary.substring(0, 150) || title
+                                        summary: summary
                                     };
                                 });
                             
