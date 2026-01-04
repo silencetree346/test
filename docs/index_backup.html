@@ -487,26 +487,8 @@
             </div>
 
             <div class="section">
-                <h3 class="section-title">💡 关键启示</h3>
-                <div class="recommendations">
-                    <div class="recommendation-item">
-                        <div class="recommendation-number">1</div>
-                        <div class="recommendation-text">
-                            <strong>把握行业趋势：</strong>年轻化、高端化、健康化是三大方向，ESG和数字化成为标配
-                        </div>
-                    </div>
-                    <div class="recommendation-item">
-                        <div class="recommendation-number">2</div>
-                        <div class="recommendation-text">
-                            <strong>应对市场挑战：</strong>供应链直采降低成本波动，私域流量降低获客成本
-                        </div>
-                    </div>
-                    <div class="recommendation-item">
-                        <div class="recommendation-number">3</div>
-                        <div class="recommendation-text">
-                            <strong>差异化竞争：</strong>明确定位，高端体验型或高效性价比型，人货场协同发力
-                        </div>
-                    </div>
+                <h3 class="section-title">💡 战略规划</h3>
+                <div class="recommendations" v-html="currentReport.recommendations">
                 </div>
             </div>
         </div>
@@ -1146,12 +1128,12 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                 },
                 
                 generateRecommendations() {
-                    // 简化版：关键启示已在HTML中固定定义
-                    return '';
-                },
-                
-                async generateReport() {
-                    this.loading = true;
+                    return `<div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+    <div style="font-size: 17px; font-weight: 600;">基于资讯分析的战略优化路径</div>
+    <div style="font-size: 14px; opacity: 0.9; margin-top: 5px;">营销增长 × 供应链 × 门店运营</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
     <!-- 营销增长 -->
     <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px; text-align: center;">

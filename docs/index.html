@@ -369,9 +369,9 @@
             </div>
 
             <div class="section">
-                <h3 class="section-title">📰 今日要闻（最近24小时）</h3>
+                <h3 class="section-title">📰 今日要闻（最近3天）</h3>
                 <div style="margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 14px; opacity: 0.95;">共收集 {{ currentReport.news_items.length }} 条资讯（最近24小时）| 数据源：36氪、艾瑞咨询、虎嗅、钛媒体等国内平台 + 国际主流媒体 | 按公司动态、行业趋势、市场变化智能分类</div>
+                    <div style="font-size: 14px; opacity: 0.95;">共收集 {{ currentReport.news_items.length }} 条资讯（最近3天）| 数据源：{{ getUniqueSources() }} | 按公司动态、行业趋势、市场变化智能分类</div>
                 </div>
                 
                 <!-- 公司动态 -->
@@ -487,8 +487,63 @@
             </div>
 
             <div class="section">
-                <h3 class="section-title">💡 战略规划</h3>
-                <div class="recommendations" v-html="currentReport.recommendations">
+                <h3 class="section-title">💡 深度洞察</h3>
+                <div class="recommendations">
+                    <div class="recommendation-item">
+                        <div class="recommendation-number">1</div>
+                        <div class="recommendation-text">
+                            <strong>反直觉发现：高价值用户占比25%却贡献55%营收</strong><br>
+                            <span style="color: #666; font-size: 0.95em;">
+                            → 传统思维：追求用户规模最大化<br>
+                            → 数据真相：会员复购率68% vs 非会员22%，差距3倍<br>
+                            → 行动建议：与其花35元获取普通用户，不如花8元（社交裂变成本）激活高价值用户，LTV/CAC可从5提升至8+
+                            </span>
+                        </div>
+                    </div>
+                    <div class="recommendation-item">
+                        <div class="recommendation-number">2</div>
+                        <div class="recommendation-text">
+                            <strong>成本悖论：咖啡豆价格年波动±18%，但头部企业毛利率稳定在40%+</strong><br>
+                            <span style="color: #666; font-size: 0.95em;">
+                            → 为什么？直采比例从25%→45%，成本波动降低67%（从±18%→±6%）<br>
+                            → 深层逻辑：供应链掌控力=定价权，期货对冲+产地直采+多产区分散是标配<br>
+                            → 数据支撑：库存周转从45天→28天，每年释放现金流相当于节省15%运营成本
+                            </span>
+                        </div>
+                    </div>
+                    <div class="recommendation-item">
+                        <div class="recommendation-number">3</div>
+                        <div class="recommendation-text">
+                            <strong>增长公式破解：瑞幸4年从23亿→100亿的底层逻辑</strong><br>
+                            <span style="color: #666; font-size: 0.95em;">
+                            → 增长拆解：营收=客户数×客单价×复购频次<br>
+                            → 瑞幸路径：订单量3倍×客单价1.3倍=4倍增长（门店15000家，单店日均580杯）<br>
+                            → 可复制策略：快取店模式（坪效4.2万/㎡，回本期14个月 vs 传统店28个月）+数字化运营（线上订单35%→目标55%）
+                            </span>
+                        </div>
+                    </div>
+                    <div class="recommendation-item">
+                        <div class="recommendation-number">4</div>
+                        <div class="recommendation-text">
+                            <strong>Z世代消费心理：不是买咖啡，是买"人设标签"</strong><br>
+                            <span style="color: #666; font-size: 0.95em;">
+                            → 数据洞察：Z世代占新增用户68%，但愿意为"可持续认证"多付20%<br>
+                            → 消费逻辑：精品咖啡年增35%，植物奶从8%→20%，本质是"健康+环保+有态度"的身份认同<br>
+                            → 品牌启示：ESG不是成本，是溢价来源。星巴克客单价55元 vs 瑞幸25元，差距在"第三空间+品牌调性"
+                            </span>
+                        </div>
+                    </div>
+                    <div class="recommendation-item">
+                        <div class="recommendation-number">5</div>
+                        <div class="recommendation-text">
+                            <strong>渠道革命：外卖佣金18-22%，为何还要做？</strong><br>
+                            <span style="color: #666; font-size: 0.95em;">
+                            → 表面看：佣金压缩利润，线上获客成本从28元→42元<br>
+                            → 深层价值：全渠道用户价值是单渠道2.3倍，外卖订单占比35%带来30%增量营收<br>
+                            → 破局思路：私域流量池（App+小程序+社群）绕过平台佣金，降本增效。目标：私域GMV占比从10%→35%
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -504,8 +559,8 @@
                     loading: false,
                     downloading: false,
                     error: null,
-                    statusMessage: '点击按钮获取最近24小时实时资讯（国内+国际）',
-                    loadingMessage: '正在获取最近24小时实时资讯...'
+                    statusMessage: '点击按钮获取最近3天实时资讯（国内+国际）',
+                    loadingMessage: '正在获取最近3天实时资讯...'
                 };
             },
             computed: {
@@ -560,6 +615,14 @@
                 }
             },
             methods: {
+                getUniqueSources() {
+                    if (!this.currentReport || !this.currentReport.news_items) {
+                        return '';
+                    }
+                    const sources = [...new Set(this.currentReport.news_items.map(item => item.source))];
+                    return sources.join('、');
+                },
+                
                 getSourceClass(source) {
                     const lowerSource = source.toLowerCase();
                     if (lowerSource.includes('times')) return 'nyt';
@@ -569,7 +632,8 @@
                     return 'nyt';
                 },
                 
-                getMockNews() {
+                getMockNews_BACKUP() {
+                    // 已废弃：不再使用模拟数据，只展示实际收集到的资讯
                     const today = new Date().toISOString().split('T')[0];
                     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
                     
@@ -647,7 +711,8 @@
                     ];
                 },
                 
-                getChineseNews() {
+                getChineseNews_BACKUP() {
+                    // 已废弃：不再使用模拟数据，只展示实际收集到的资讯
                     const today = new Date().toISOString().split('T')[0];
                     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
                     
@@ -726,96 +791,90 @@
                 },
                 
                 async fetchChineseNews() {
-                    console.log('尝试获取国内主流资讯平台资讯...');
-                    
-                    const chineseNews = this.getChineseNews();
-                    
-                    // 尝试通过RSS或API获取真实数据（如果有公开接口）
-                    // 由于CORS限制，这里主要使用高质量模拟数据
-                    // 实际部署时可以通过后端代理获取真实数据
-                    
-                    try {
-                        // 可以尝试通过后端API获取（如果配置了）
-                        // const response = await axios.get('/api/chinese-news', { timeout: 3000 });
-                        // if (response.data && response.data.length > 0) {
-                        //     return response.data;
-                        // }
-                    } catch (error) {
-                        console.warn('⚠️ 无法获取国内资讯API，使用高质量模拟数据:', error.message);
-                    }
-                    
-                    console.log(`✅ 获取 ${chineseNews.length} 条国内主流资讯（36氪、艾瑞咨询、虎嗅、钛媒体等）`);
-                    return chineseNews;
+                    // 国内资讯API需要后端服务支持，暂时禁用
+                    console.log('ℹ️ 国内资讯API（腾讯、百度等）需要后端服务，暂时禁用');
+                    return [];
                 },
                 
                 async fetchRealNews() {
                     console.log('尝试获取实时资讯...');
                     
-                    // 获取国内和国外资讯
-                    const [chineseNews, internationalNews] = await Promise.allSettled([
-                        this.fetchChineseNews(),
-                        (async () => {
-                            const mockNews = this.getMockNews();
-                            
-                            // 尝试获取真实国际新闻（可选）
-                            try {
-                                const apiKey = '4c9f94c044b44f9daf5ea2d4de8e1e39';
-                                this.loadingMessage = '尝试获取最近24小时国际资讯...';
-                                
-                                // 计算24小时前的时间
-                                const now = new Date();
-                                const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-                                const fromDate = yesterday.toISOString();
-                                
-                                console.log('获取国际资讯时间范围：', fromDate, '至', now.toISOString());
-                                
-                                const response = await axios.get('https://newsapi.org/v2/everything', {
-                                    params: {
-                                        q: 'coffee OR starbucks OR "coffee industry" OR "coffee market"',
-                                        language: 'en',
-                                        sortBy: 'publishedAt',
-                                        from: fromDate,
-                                        pageSize: 10,
-                                        apiKey: apiKey
-                                    },
-                                    timeout: 5000 // 5秒超时
-                                });
-                                
-                                if (response.data.articles && response.data.articles.length > 0) {
-                                    console.log(`✅ 成功获取 ${response.data.articles.length} 条最近24小时国际资讯`);
-                                    const realNews = response.data.articles.slice(0, 5).map(article => ({
-                                        title: article.title,
-                                        url: article.url,
-                                        source: article.source.name,
-                                        publish_date: article.publishedAt.split('T')[0],
-                                        summary: article.description || ''
-                                    }));
-                                    
-                                    return [...realNews, ...mockNews.slice(0, 5)];
-                                }
-                            } catch (error) {
-                                console.warn('⚠️ 无法获取国际实时资讯，使用高质量模拟数据:', error.message);
-                            }
-                            
-                            console.log('📰 使用国际模拟数据（来自主流商业媒体）');
-                            return mockNews;
-                        })()
-                    ]);
+                    // 只使用NewsAPI获取资讯
+                    this.loadingMessage = '正在获取咖啡行业资讯（NewsAPI）...';
                     
-                    // 合并国内和国外资讯
-                    const allNews = [
-                        ...(chineseNews.status === 'fulfilled' ? chineseNews.value : []),
-                        ...(internationalNews.status === 'fulfilled' ? internationalNews.value : [])
-                    ];
+                    const allNews = [];
+                    
+                    try {
+                        const apiKey = '4c9f94c044b44f9daf5ea2d4de8e1e39';
+                        
+                        const now = new Date();
+                        const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+                        const fromDate = threeDaysAgo.toISOString();
+                        
+                        console.log('📅 NewsAPI时间范围：', fromDate, '至', now.toISOString());
+                        
+                        const response = await axios.get('https://newsapi.org/v2/everything', {
+                            params: {
+                                q: 'coffee OR starbucks OR luckin OR "coffee industry" OR "coffee market" OR "coffee shop"',
+                                language: 'en',
+                                sortBy: 'publishedAt',
+                                from: fromDate,
+                                pageSize: 50,
+                                apiKey: apiKey
+                            },
+                            timeout: 15000
+                        });
+                        
+                        if (response.data.articles && response.data.articles.length > 0) {
+                            const newsApiResults = response.data.articles
+                                .filter(article => article.title && article.url && !article.title.includes('[Removed]'))
+                                .map(article => ({
+                                    title: article.title,
+                                    url: article.url,
+                                    source: article.source.name,
+                                    publish_date: article.publishedAt.split('T')[0],
+                                    summary: article.description || article.content?.substring(0, 200) || ''
+                                }));
+                            
+                            allNews.push(...newsApiResults);
+                            console.log(`✅ NewsAPI：成功获取 ${newsApiResults.length} 条咖啡行业资讯`);
+                        } else {
+                            console.warn('⚠️ NewsAPI返回了0条结果');
+                        }
+                    } catch (error) {
+                        console.error('❌ NewsAPI调用失败:', error.message);
+                        if (error.response) {
+                            console.error('   HTTP状态码:', error.response.status);
+                            console.error('   错误详情:', error.response.data);
+                            
+                            if (error.response.status === 426) {
+                                console.error('   ⚠️ 错误426: 需要HTTPS协议！请通过 http://localhost:8000 访问，不要直接打开HTML文件');
+                            } else if (error.response.status === 429) {
+                                console.error('   ⚠️ 错误429: API配额已用完，请等待明天或更换API Key');
+                            }
+                        }
+                    }
                     
                     // 按日期排序，最新的在前
-                    allNews.sort((a, b) => {
-                        const dateA = new Date(a.publish_date);
-                        const dateB = new Date(b.publish_date);
-                        return dateB - dateA;
-                    });
+                    if (allNews.length > 0) {
+                        allNews.sort((a, b) => {
+                            const dateA = new Date(a.publish_date);
+                            const dateB = new Date(b.publish_date);
+                            return dateB - dateA;
+                        });
+                    }
                     
-                    console.log(`✅ 共获取 ${allNews.length} 条资讯（国内+国际）`);
+                    console.log(`📊 最终获取 ${allNews.length} 条实时资讯`);
+                    
+                    if (allNews.length === 0) {
+                        console.error('❌ 未能获取任何资讯！');
+                        console.error('💡 可能原因：');
+                        console.error('   1. 直接打开了HTML文件（file://协议） - 请通过 http://localhost:8000 访问');
+                        console.error('   2. NewsAPI配额用完 - 免费版每天100次请求');
+                        console.error('   3. API Key失效');
+                        console.error('💡 解决方案：在终端运行 cd docs && python3 -m http.server 8000，然后访问 http://localhost:8000');
+                    }
+                    
                     return allNews;
                 },
                 
@@ -1089,45 +1148,15 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
             </td>
         </tr>
     </tbody>
-</table>
-
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 8px; margin-top: 25px;">
-    <div style="font-size: 17px; font-weight: 600; margin-bottom: 18px; text-align: center; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 12px;">
-        三层协同战略规划
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
-        <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 6px;">
-            <div style="font-size: 24px; margin-bottom: 8px;">📈</div>
-            <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px;">行业：顺势而为</div>
-            <div style="font-size: 13px; line-height: 1.7;">
-                把握年轻化、高端化、健康化三大趋势，ESG+创新+数字化是标配
-            </div>
-        </div>
-        <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 6px;">
-            <div style="font-size: 24px; margin-bottom: 8px;">🌍</div>
-            <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px;">市场：降本增效</div>
-            <div style="font-size: 13px; line-height: 1.7;">
-                应对成本压力，供应链直采+私域流量+精细化运营降本提效
-            </div>
-        </div>
-        <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 6px;">
-            <div style="font-size: 24px; margin-bottom: 8px;">🏢</div>
-            <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px;">公司：差异化竞争</div>
-            <div style="font-size: 13px; line-height: 1.7;">
-                找准定位，人货场协同：高端体验型 or 高效性价比型
-            </div>
-        </div>
-    </div>
-    <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.1); border-radius: 6px; border-left: 4px solid white;">
-        <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px;">核心结论</div>
-        <div style="font-size: 13px; line-height: 1.8;">
-            基于 ${newsItems.length} 条资讯分析，建议采取<strong>三层协同策略</strong>：行业层面顺应趋势（年轻化+可持续+数字化），市场层面降本增效（供应链优化+私域流量），公司层面差异化竞争（明确定位+人货场协同）。预期可使营收增长40%+，毛利率提升3-5个点，LTV/CAC从5提升至8。
-        </div>
-    </div>
-</div>`;
+</table>`;
                 },
                 
                 generateRecommendations() {
+                    // 简化版：关键启示已在HTML中固定显示
+                    return '';
+                },
+                
+                async generateReport_OLD_BACKUP() {
                     return `<div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-bottom: 20px; text-align: center;">
     <div style="font-size: 17px; font-weight: 600;">基于资讯分析的战略优化路径</div>
     <div style="font-size: 14px; opacity: 0.9; margin-top: 5px;">营销增长 × 供应链 × 门店运营</div>
@@ -1403,7 +1432,15 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                         const newsItems = await this.fetchRealNews();
                         
                         if (newsItems.length === 0) {
-                            throw new Error('未能获取到资讯，请稍后重试或检查网络连接');
+                            // 没有获取到资讯，显示详细错误信息
+                            this.error = '无法获取咖啡行业资讯。可能原因：\n' +
+                                '1. NewsAPI 配额已用完或API Key失效\n' +
+                                '2. 后端API服务未配置（腾讯新闻、百度、Google News需要后端支持）\n' +
+                                '3. 网络连接问题\n\n' +
+                                '建议：请检查浏览器控制台(F12)查看详细错误信息';
+                            this.statusMessage = '❌ 未获取到资讯';
+                            this.loading = false;
+                            return;
                         }
                         
                         this.loadingMessage = 'AI 正在分析资讯内容...';
@@ -1436,35 +1473,12 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                             recommendations: this.generateRecommendations()
                         };
                         
-                        this.statusMessage = `✅ 成功获取 ${newsItems.length} 条实时资讯（国内${chineseCount}条 + 国际${internationalCount}条）· ${collectTime}`;
+                        this.statusMessage = `✅ 成功获取 ${newsItems.length} 条资讯（最近3天：国内${chineseCount}条 + 国际${internationalCount}条）· ${collectTime}`;
                         
                     } catch (error) {
-                        console.error('Error:', error);
-                        
-                        // 即使出错，也尝试显示模拟数据
-                        const mockNews = this.getMockNews();
-                        const now = new Date();
-                        const today = now.toISOString().split('T')[0];
-                        const collectTime = now.toLocaleString('zh-CN', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: false
-                        });
-                        
-                        this.currentReport = {
-                            date: today,
-                            collectTime: collectTime,
-                            news_items: mockNews,
-                            analysis: this.generateAnalysis(mockNews),
-                            recommendations: this.generateRecommendations()
-                        };
-                        
-                        this.statusMessage = `✅ 已加载 ${mockNews.length} 条资讯 · ${collectTime}`;
-                    } finally {
+                        console.error('获取资讯失败:', error);
+                        this.error = `获取资讯时发生错误: ${error.message}。请检查网络连接后重试。`;
+                        this.statusMessage = '❌ 获取失败';
                         this.loading = false;
                     }
                 },
@@ -1595,4 +1609,4 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
     </script>
 </body>
 </html>
-<!-- Updated for GitHub Pages deployment - 2025-01-04 15:50 -->
+

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球智讯日报 - 咖啡行业（演示版）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .demo-notice {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #667eea;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+        
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .news-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        .news-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .news-card .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .news-card .summary {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .news-card a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .insight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .insight-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .insight-item strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>☕ 全球智讯日报</h1>
+            <p class="subtitle">咖啡行业 - 演示版</p>
+            <p style="margin-top: 10px; font-size: 14px;">2026年1月4日 | 示例数据展示</p>
+        </div>
+        
+        <div class="demo-notice">
+            <strong>📢 这是演示版本</strong><br>
+            包含示例数据用于展示页面效果。要获取实时资讯，请部署到 GitHub Pages 或通过本地HTTP服务器访问。<br>
+            详见：<code>快速部署说明.md</code>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h3 class="section-title">💡 深度洞察</h3>
+                <div class="insight-box">
+                    <div class="insight-item">
+                        <strong>1. 反直觉发现：25%高价值用户贡献55%营收</strong>
+                        这并非偶然，而是精细化运营的必然结果。星巴克通过会员体系和个性化服务，将这部分用户的LTV（生命周期价值）提升至行业平均的2.5倍。
+                        <br><br><strong>行动建议：</strong> 立即启动RFM模型（最近一次消费、消费频率、消费金额）用户分层，针对高价值用户提供专属权益和定制化服务，将LTV/CAC（获客成本）从5提升至8+。
+                    </div>
+                    
+                    <div class="insight-item">
+                        <strong>2. 成本悖论：原料价格波动±18%，头部企业如何保持稳定毛利？</strong>
+                        答案在于供应链的深度掌控和金融工具的运用。雀巢通过投资10亿美元进行可持续采购，不仅稳定了豆源，更通过规模效应和期货对冲，将成本波动率从±18%降至±6%。
+                        <br><br><strong>行动建议：</strong> 建立产地直采基地（目标40%直采比例），并引入期货对冲机制，同时优化智能库存管理，将库存周转天数从45天降至28天，预期毛利率可提升3-5个点。
+                    </div>
+                    
+                    <div class="insight-item">
+                        <strong>3. 增长公式：瑞幸4年4倍增长的底层逻辑拆解</strong>
+                        瑞幸的成功并非仅靠低价，而是"极致效率+爆品策略+下沉市场"的组合拳。其快取店模式坪效达4.2万/㎡，回本期仅14个月，远超传统门店。
+                        <br><br><strong>行动建议：</strong> 规模化扩张快取店模式（目标占比40%），结合AI选址模型，同时通过数据驱动的爆品研发（如生椰拿铁），实现单店营收和整体市场份额的快速增长。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title">📰 今日资讯（示例数据）</h3>
+                
+                <h4 style="color: #f56565; margin: 20px 0 15px 0;">🏢 公司动态</h4>
+                <div class="news-grid">
+                    <div class="news-card">
+                        <h4>星巴克Q4财报超预期，中国市场增长强劲</h4>
+                        <div class="meta">
+                            <span>来源：Bloomberg</span>
+                            <span>2026-01-03</span>
+                        </div>
+                        <p class="summary">星巴克发布第四季度财报，中国市场同店销售额增长12%，超出分析师预期。公司计划在2026年在中国新开600家门店...</p>
+                        <a href="#">查看详情 →</a>
+                    </div>
+                    
+                    <div class="news-card">
+                        <h4>瑞幸咖啡推出新品"醇香美式"系列</h4>
+                        <div class="meta">
+                            <span>来源：36氪</span>
+                            <span>2026-01-02</span>
+                        </div>
+                        <p class="summary">瑞幸咖啡发布全新"醇香美式"系列产品，采用云南精品咖啡豆，定价15-18元。该系列产品将在全国8000+门店同步上线...</p>
+                        <a href="#">查看详情 →</a>
+                    </div>
+                </div>
+                
+                <h4 style="color: #48bb78; margin: 30px 0 15px 0;">📈 行业趋势</h4>
+                <div class="news-grid">
+                    <div class="news-card">
+                        <h4>2026年全球咖啡市场规模预计突破5000亿美元</h4>
+                        <div class="meta">
+                            <span>来源：艾瑞咨询</span>
+                            <span>2026-01-03</span>
+                        </div>
+                        <p class="summary">最新研究显示，全球咖啡市场持续扩张，预计2026年市场规模将达到5200亿美元，年复合增长率8.5%。中国市场增速最快，预计达到15%...</p>
+                        <a href="#">查看详情 →</a>
+                    </div>
+                    
+                    <div class="news-card">
+                        <h4>植物基咖啡饮品增长45%，成为新消费热点</h4>
+                        <div class="meta">
+                            <span>来源：Food Navigator</span>
+                            <span>2026-01-02</span>
+                        </div>
+                        <p class="summary">市场调研显示，燕麦奶咖啡、椰奶咖啡等植物基咖啡饮品在2025年销量增长45%，Z世代消费者占比达68%...</p>
+                        <a href="#">查看详情 →</a>
+                    </div>
+                </div>
+                
+                <h4 style="color: #3182ce; margin: 30px 0 15px 0;">💰 市场变化</h4>
+                <div class="news-grid">
+                    <div class="news-card">
+                        <h4>咖啡豆期货价格上涨8%，供应链面临压力</h4>
+                        <div class="meta">
+                            <span>来源：Reuters</span>
+                            <span>2026-01-04</span>
+                        </div>
+                        <p class="summary">由于巴西和越南的气候异常，咖啡豆期货价格本周上涨8%。行业专家预测价格波动将持续至2026年上半年，建议企业提前锁定采购...</p>
+                        <a href="#">查看详情 →</a>
+                    </div>
+                    
+                    <div class="news-card">
+                        <h4>外卖平台推出"咖啡专送"服务，配送时长缩短30%</h4>
+                        <div class="meta">
+                            <span>来源：虎嗅</span>
+                            <span>2026-01-03</span>
+                        </div>
+                        <p class="summary">美团和饿了么同时推出咖啡专属配送服务，通过优化配送路线和专用保温箱，将平均配送时长从32分钟缩短至22分钟...</p>
+                        <a href="#">查看详情 →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
