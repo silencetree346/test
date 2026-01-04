@@ -369,9 +369,9 @@
             </div>
 
             <div class="section">
-                <h3 class="section-title">📰 今日要闻（最近7天）</h3>
+                <h3 class="section-title">📰 今日要闻（今日0点后）</h3>
                 <div style="margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 14px; opacity: 0.95;">共收集 {{ currentReport.news_items.length }} 条资讯（最近7天）| 数据源：{{ getUniqueSources() }} | 按公司动态、行业趋势、市场变化智能分类</div>
+                    <div style="font-size: 14px; opacity: 0.95;">共收集 {{ currentReport.news_items.length }} 条资讯（今日0点后）| 数据源：{{ getUniqueSources() }} | 按公司动态、行业趋势、市场变化智能分类</div>
                 </div>
                 
                 <!-- 公司动态 -->
@@ -559,8 +559,8 @@
                     loading: false,
                     downloading: false,
                     error: null,
-                    statusMessage: '⚡ 智能缓存 | 点击按钮获取最新资讯',
-                    loadingMessage: '正在获取最近7天实时资讯...'
+                    statusMessage: '⚡ 智能缓存 | 点击按钮获取今日资讯',
+                    loadingMessage: '正在获取今日实时资讯...'
                 };
             },
             computed: {
@@ -823,12 +823,13 @@
                         const guardianApiKey = 'test';
                         
                         const now = new Date();
-                        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        const fromDate = sevenDaysAgo.toISOString().split('T')[0];
+                        // 获取今天0点（当地时间）
+                        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        const fromDate = todayStart.toISOString().split('T')[0];
                         const toDate = now.toISOString().split('T')[0];
                         
-                        console.log('📅 时间范围：', fromDate, '至', toDate);
-                        
+                        const todayStartTime = todayStart.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                        console.log('📅 时间范围：今日 00:00 至', now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
                         console.log('🔍 搜索关键词：coffee, starbucks, cafe');
                         
                         const response = await axios.get('https://content.guardianapis.com/search', {
@@ -1455,7 +1456,7 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                         
                         if (newsItems.length === 0) {
                             // 没有获取到资讯，显示详细错误信息
-                            this.error = '⚠️ 过去7天未获取到咖啡行业相关资讯信息\n\n' +
+                            this.error = '⚠️ 今日暂未获取到咖啡行业相关资讯信息\n\n' +
                                 '可能原因：\n' +
                                 '1. The Guardian 近期没有相关咖啡行业报道\n' +
                                 '2. 网络连接问题\n' +
@@ -1499,7 +1500,7 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                             recommendations: this.generateRecommendations()
                         };
                         
-                        this.statusMessage = `✅ 成功获取 ${newsItems.length} 条资讯（最近7天）· ${collectTime}`;
+                        this.statusMessage = `✅ 成功获取 ${newsItems.length} 条资讯（今日0点后）· ${collectTime}`;
                         
                     } catch (error) {
                         console.error('获取资讯失败:', error);
