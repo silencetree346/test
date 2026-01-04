@@ -897,9 +897,48 @@
                 },
                 
                 async fetchChineseNews() {
-                    // 国内资讯API需要后端服务支持，暂时禁用
-                    console.log('ℹ️ 国内资讯API（腾讯、百度等）需要后端服务，暂时禁用');
-                    return [];
+                    console.log('🌐 尝试从后端获取资讯...');
+                    
+                    try {
+                        // 根据环境自动选择后端URL
+                        // 本地开发：http://localhost:3001
+                        // GitHub Pages：使用云端后端URL（需要配置）
+                        const isLocalhost = window.location.hostname === 'localhost' || 
+                                           window.location.hostname === '127.0.0.1';
+                        
+                        // 云端后端URL（部署后需要替换为实际地址）
+                        // 例如：https://your-backend.herokuapp.com
+                        // 例如：https://your-backend.vercel.app
+                        const cloudBackendUrl = 'https://your-backend-url.herokuapp.com/api/coffee-news-sources';
+                        const localBackendUrl = 'http://localhost:3001/api/coffee-news-sources';
+                        
+                        const backendUrl = isLocalhost ? localBackendUrl : cloudBackendUrl;
+                        
+                        console.log(`📍 使用后端地址: ${backendUrl}`);
+                        
+                        const response = await axios.get(backendUrl, {
+                            timeout: 15000 // 15秒超时
+                        });
+                        
+                        // 转换数据格式以匹配前端需求
+                        const news = response.data.map(item => ({
+                            title: item.title,
+                            url: item.url || item.webUrl || '#',
+                            source: item.source || '未知来源',
+                            publish_date: item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                            summary: item.summary || item.abstract || item.title
+                        }));
+                        
+                        console.log(`✅ 从后端获取 ${news.length} 条资讯`);
+                        return news;
+                        
+                    } catch (error) {
+                        console.error('❌ 后端资讯源获取失败:', error.message);
+                        if (error.code === 'ECONNREFUSED') {
+                            console.log('💡 请确保后端服务正在运行：cd backend-news-proxy && npm start');
+                        }
+                        return [];
+                    }
                 },
                 
                 async fetchRealNews() {
@@ -1086,34 +1125,6 @@
                     
                     return allNews;
                 },
-                
-                // 获取指定资讯源（需要后端支持）
-                async fetchChineseNews() {
-                    console.log('🌐 尝试获取指定资讯源...');
-                    
-                    // 注意：由于浏览器的CORS限制，无法直接从前端访问这些网站
-                    // 需要配置后端API代理来获取资讯
-                    
-                    const allNews = [];
-                    
-                    // 配置的资讯源列表：
-                    // 🇨🇳 国内：36氪、虎嗅、腾讯新闻、艾瑞咨询、百度资讯
-                    // 🌍 国际：纽约时报、华尔街日报、金融时报、哈佛商业评论、星巴克官网
-                    
-                    // 后端API示例（需要配置）：
-                    // const backendUrl = 'http://localhost:3001/api/coffee-news-sources';
-                    // const response = await axios.get(backendUrl);
-                    // allNews.push(...response.data);
-                    
-                    console.log('⚠️ 指定资讯源需要配置后端API');
-                    console.log('📋 资讯源列表：');
-                    console.log('   🇨🇳 国内：36氪、虎嗅、腾讯、艾瑞咨询、百度');
-                    console.log('   🌍 国际：NYT、WSJ、FT、HBR、星巴克官网');
-                    console.log('💡 查看《指定资讯源配置指南.md》了解配置方法');
-                    
-                    return allNews;
-                },
-                
                 generateAnalysis_old(newsItems) {
                     return `【核心判断】基于${newsItems.length}条权威商业媒体报道分析，全球咖啡行业正经历"成本-体验-营收"三位一体的价值重构。企业竞争力的本质是：通过成本优化释放利润空间，用体验升级构建品牌护城河，以营收增长验证商业模式，三者形成正向飞轮。未来3年，能够平衡三维度的企业将获得40%+的市场份额增长。
 
@@ -2177,20 +2188,10 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                         const newsItems = await this.fetchRealNews();
                         
                         if (newsItems.length === 0) {
-                            // 使用模拟数据展示效果
-                            console.log('📊 使用模拟数据展示效果');
-                            const mockNews = this.getMockNewsData();
-                            this.currentReport = {
-                                date: new Date().toLocaleDateString('zh-CN', { 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric',
-                                    weekday: 'long'
-                                }),
-                                news_items: mockNews,
-                                analysis: this.generateStrategicAnalysisWrapper(mockNews)
-                            };
-                            this.statusMessage = '';
+                            // 未获取到资讯信息
+                            this.currentReport = null;
+                            this.error = '当前暂未获取到最新资讯信息。如需获取真实资讯，请配置后端服务（查看《指定资讯源配置指南.md》）';
+                            this.statusMessage = '❌ 未获取到资讯';
                             this.loading = false;
                             return;
                         }
@@ -2224,6 +2225,7 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                             recommendations: this.generateRecommendations()
                         };
                         
+                        this.error = null; // 清除错误信息
                         this.statusMessage = `✅ 成功获取 ${newsItems.length} 条资讯（今日0点后）· ${collectTime}`;
                         this.loading = false; // 关闭加载状态
                         
