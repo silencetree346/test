@@ -897,48 +897,178 @@
                 },
                 
                 async fetchChineseNews() {
-                    console.log('🌐 尝试从后端获取资讯...');
+                    console.log('🌐 尝试获取国内资讯...');
+                    const allNews = [];
                     
+                    // 方案1：尝试从后端获取（如果已配置）
                     try {
-                        // 根据环境自动选择后端URL
-                        // 本地开发：http://localhost:3001
-                        // GitHub Pages：使用云端后端URL（需要配置）
                         const isLocalhost = window.location.hostname === 'localhost' || 
                                            window.location.hostname === '127.0.0.1';
-                        
-                        // 云端后端URL（部署后需要替换为实际地址）
-                        // 例如：https://your-backend.herokuapp.com
-                        // 例如：https://your-backend.vercel.app
                         const cloudBackendUrl = 'https://your-backend-url.herokuapp.com/api/coffee-news-sources';
                         const localBackendUrl = 'http://localhost:3001/api/coffee-news-sources';
-                        
                         const backendUrl = isLocalhost ? localBackendUrl : cloudBackendUrl;
                         
-                        console.log(`📍 使用后端地址: ${backendUrl}`);
+                        // 只尝试连接已配置的后端，如果URL是占位符则跳过
+                        if (!backendUrl.includes('your-backend-url')) {
+                            const response = await axios.get(backendUrl, { timeout: 5000 });
+                            const news = response.data.map(item => ({
+                                title: item.title,
+                                url: item.url || item.webUrl || '#',
+                                source: item.source || '未知来源',
+                                publish_date: item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                                summary: item.summary || item.abstract || item.title
+                            }));
+                            allNews.push(...news);
+                            console.log(`✅ 从后端获取 ${news.length} 条资讯`);
+                        }
+                    } catch (error) {
+                        console.log('ℹ️ 后端未配置或不可用，使用RSS Feed方案');
+                    }
+                    
+                    // 方案2：通过RSS Feed + CORS代理获取（无需后端）
+                    try {
+                        // 使用公共CORS代理服务访问RSS Feed
+                        const corsProxy = 'https://api.allorigins.win/raw?url=';
                         
-                        const response = await axios.get(backendUrl, {
-                            timeout: 15000 // 15秒超时
-                        });
+                        // 36氪RSS（科技创投）
+                        try {
+                            const rss36kr = await axios.get(corsProxy + encodeURIComponent('https://36kr.com/feed'), { timeout: 5000 });
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(rss36kr.data, 'text/xml');
+                            const items = xmlDoc.querySelectorAll('item');
+                            
+                            items.forEach(item => {
+                                const title = item.querySelector('title')?.textContent || '';
+                                const link = item.querySelector('link')?.textContent || '#';
+                                const pubDate = item.querySelector('pubDate')?.textContent || '';
+                                const description = item.querySelector('description')?.textContent || '';
+                                
+                                // 过滤咖啡相关关键词
+                                if (title.toLowerCase().includes('咖啡') || 
+                                    title.toLowerCase().includes('奶茶') ||
+                                    title.toLowerCase().includes('星巴克') ||
+                                    title.toLowerCase().includes('瑞幸') ||
+                                    description.toLowerCase().includes('咖啡') ||
+                                    description.toLowerCase().includes('奶茶')) {
+                                    allNews.push({
+                                        title: title,
+                                        url: link,
+                                        source: '36氪',
+                                        publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                                        summary: description.substring(0, 150) || title
+                                    });
+                                }
+                            });
+                            console.log(`✅ 从36氪RSS获取资讯`);
+                        } catch (e) {
+                            console.log('ℹ️ 36氪RSS获取失败:', e.message);
+                        }
                         
-                        // 转换数据格式以匹配前端需求
-                        const news = response.data.map(item => ({
-                            title: item.title,
-                            url: item.url || item.webUrl || '#',
-                            source: item.source || '未知来源',
-                            publish_date: item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                            summary: item.summary || item.abstract || item.title
-                        }));
+                        // 虎嗅RSS（商业分析）
+                        try {
+                            const rssHuxiu = await axios.get(corsProxy + encodeURIComponent('https://www.huxiu.com/rss/0.xml'), { timeout: 5000 });
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(rssHuxiu.data, 'text/xml');
+                            const items = xmlDoc.querySelectorAll('item');
+                            
+                            items.forEach(item => {
+                                const title = item.querySelector('title')?.textContent || '';
+                                const link = item.querySelector('link')?.textContent || '#';
+                                const pubDate = item.querySelector('pubDate')?.textContent || '';
+                                const description = item.querySelector('description')?.textContent || '';
+                                
+                                if (title.toLowerCase().includes('咖啡') || 
+                                    title.toLowerCase().includes('奶茶') ||
+                                    title.toLowerCase().includes('星巴克') ||
+                                    title.toLowerCase().includes('瑞幸') ||
+                                    description.toLowerCase().includes('咖啡') ||
+                                    description.toLowerCase().includes('奶茶')) {
+                                    allNews.push({
+                                        title: title,
+                                        url: link,
+                                        source: '虎嗅',
+                                        publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                                        summary: description.substring(0, 150) || title
+                                    });
+                                }
+                            });
+                            console.log(`✅ 从虎嗅RSS获取资讯`);
+                        } catch (e) {
+                            console.log('ℹ️ 虎嗅RSS获取失败:', e.message);
+                        }
                         
-                        console.log(`✅ 从后端获取 ${news.length} 条资讯`);
-                        return news;
+                        // 钛媒体RSS（科技媒体）
+                        try {
+                            const rssTmt = await axios.get(corsProxy + encodeURIComponent('https://www.tmtpost.com/rss.xml'), { timeout: 5000 });
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(rssTmt.data, 'text/xml');
+                            const items = xmlDoc.querySelectorAll('item');
+                            
+                            items.forEach(item => {
+                                const title = item.querySelector('title')?.textContent || '';
+                                const link = item.querySelector('link')?.textContent || '#';
+                                const pubDate = item.querySelector('pubDate')?.textContent || '';
+                                const description = item.querySelector('description')?.textContent || '';
+                                
+                                if (title.toLowerCase().includes('咖啡') || 
+                                    title.toLowerCase().includes('奶茶') ||
+                                    title.toLowerCase().includes('星巴克') ||
+                                    title.toLowerCase().includes('瑞幸') ||
+                                    description.toLowerCase().includes('咖啡') ||
+                                    description.toLowerCase().includes('奶茶')) {
+                                    allNews.push({
+                                        title: title,
+                                        url: link,
+                                        source: '钛媒体',
+                                        publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                                        summary: description.substring(0, 150) || title
+                                    });
+                                }
+                            });
+                            console.log(`✅ 从钛媒体RSS获取资讯`);
+                        } catch (e) {
+                            console.log('ℹ️ 钛媒体RSS获取失败:', e.message);
+                        }
+                        
+                        // 界面新闻RSS（商业新闻）
+                        try {
+                            const rssJiemian = await axios.get(corsProxy + encodeURIComponent('https://www.jiemian.com/rss.xml'), { timeout: 5000 });
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(rssJiemian.data, 'text/xml');
+                            const items = xmlDoc.querySelectorAll('item');
+                            
+                            items.forEach(item => {
+                                const title = item.querySelector('title')?.textContent || '';
+                                const link = item.querySelector('link')?.textContent || '#';
+                                const pubDate = item.querySelector('pubDate')?.textContent || '';
+                                const description = item.querySelector('description')?.textContent || '';
+                                
+                                if (title.toLowerCase().includes('咖啡') || 
+                                    title.toLowerCase().includes('奶茶') ||
+                                    title.toLowerCase().includes('星巴克') ||
+                                    title.toLowerCase().includes('瑞幸') ||
+                                    description.toLowerCase().includes('咖啡') ||
+                                    description.toLowerCase().includes('奶茶')) {
+                                    allNews.push({
+                                        title: title,
+                                        url: link,
+                                        source: '界面新闻',
+                                        publish_date: pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                                        summary: description.substring(0, 150) || title
+                                    });
+                                }
+                            });
+                            console.log(`✅ 从界面新闻RSS获取资讯`);
+                        } catch (e) {
+                            console.log('ℹ️ 界面新闻RSS获取失败:', e.message);
+                        }
                         
                     } catch (error) {
-                        console.error('❌ 后端资讯源获取失败:', error.message);
-                        if (error.code === 'ECONNREFUSED') {
-                            console.log('💡 请确保后端服务正在运行：cd backend-news-proxy && npm start');
-                        }
-                        return [];
+                        console.log('ℹ️ RSS Feed获取失败:', error.message);
                     }
+                    
+                    console.log(`📊 共获取 ${allNews.length} 条国内资讯`);
+                    return allNews;
                 },
                 
                 async fetchRealNews() {
