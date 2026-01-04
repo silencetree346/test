@@ -1,0 +1,160 @@
+咖啡行业调研系统 - 完整项目结构
+========================================
+
+test/
+│
+├── backend/                          # 后端服务目录
+│   ├── __init__.py                   # Python包初始化
+│   ├── main.py                       # FastAPI主服务（核心）
+│   ├── config.py                     # 配置管理
+│   ├── email_service.py              # 邮件推送服务
+│   ├── requirements.txt              # Python依赖列表
+│   ├── env_template.txt              # 环境变量模板
+│   └── test_api.py                   # API接口测试脚本
+│
+├── frontend/                         # 前端界面目录
+│   ├── index.html                    # Vue.js管理界面（单页应用）
+│   └── config.js                     # 前端配置文件
+│
+├── install.sh                        # 自动安装脚本
+├── start.sh                          # 启动服务脚本
+├── stop.sh                           # 停止服务脚本
+├── README.txt                        # 项目说明文档
+├── 使用说明.txt                      # 详细使用指南
+├── 项目结构.txt                      # 本文件
+└── .gitignore                        # Git忽略配置
+
+========================================
+文件说明
+========================================
+
+【核心文件】
+- backend/main.py
+  * FastAPI Web服务器
+  * 新闻抓取逻辑
+  * AI分析接口
+  * 定时任务调度
+  * RESTful API端点
+
+- backend/config.py
+  * 集中管理所有配置
+  * 环境变量读取
+  * 默认值设置
+
+- backend/email_service.py
+  * 邮件发送功能
+  * HTML报告模板
+  * SMTP配置管理
+
+- frontend/index.html
+  * Vue 3单页应用
+  * 响应式UI设计
+  * 报告可视化展示
+  * 实时数据交互
+
+【配置文件】
+- backend/requirements.txt
+  * fastapi - Web框架
+  * uvicorn - ASGI服务器
+  * apscheduler - 定时任务
+  * openai - AI分析
+  * httpx - HTTP客户端
+  * beautifulsoup4 - HTML解析
+
+- backend/env_template.txt
+  * API密钥配置模板
+  * 邮件服务配置
+  * 定时任务配置
+
+【脚本文件】
+- install.sh
+  * 创建虚拟环境
+  * 安装Python依赖
+  * 环境检查
+
+- start.sh
+  * 激活虚拟环境
+  * 启动FastAPI服务
+  * 监听8000端口
+
+- stop.sh
+  * 停止运行中的服务
+
+- backend/test_api.py
+  * 测试所有API端点
+  * 验证服务状态
+
+========================================
+关键技术
+========================================
+
+【后端技术栈】
+✓ FastAPI - 现代高性能Web框架
+✓ APScheduler - Python定时任务库
+✓ OpenAI API - GPT-4智能分析
+✓ HTTPX - 异步HTTP客户端
+✓ BeautifulSoup4 - 网页解析
+✓ Pydantic - 数据验证
+
+【前端技术栈】
+✓ Vue 3 - 渐进式JavaScript框架
+✓ Axios - HTTP请求库
+✓ 原生CSS - 渐变色+现代设计
+
+【功能特性】
+✓ 多源新闻聚合
+✓ AI深度分析
+✓ 定时自动运行
+✓ 邮件推送通知
+✓ 可视化管理界面
+✓ RESTful API
+
+========================================
+数据流程
+========================================
+
+1. 定时触发（每天9:00）
+   ↓
+2. 抓取咖啡行业新闻（多个来源）
+   ↓
+3. GPT-4分析新闻内容
+   ↓
+4. 生成分析报告+战略建议
+   ↓
+5. 存储到内存数据库（最多30份）
+   ↓
+6. 邮件推送（如已配置）
+   ↓
+7. 前端界面展示
+
+========================================
+部署要求
+========================================
+
+【系统要求】
+- Python 3.8+
+- 现代浏览器（Chrome/Firefox/Safari）
+
+【必需配置】
+- OpenAI API Key（必需）
+
+【可选配置】
+- News API Key（提升新闻质量）
+- SMTP邮件服务（启用推送）
+
+【网络要求】
+- 访问OpenAI API
+- 访问新闻网站
+
+========================================
+端口说明
+========================================
+
+后端API: http://localhost:8000
+前端界面: file:///.../frontend/index.html
+
+========================================
+
+
+
+

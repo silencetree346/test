@@ -1,0 +1,53 @@
+# ==========================================
+# 🚀 初始化Git仓库并推送到GitHub
+# ==========================================
+# 
+# 请复制以下所有命令到终端执行
+#
+
+cd /Users/luckincoffee/test
+
+# 步骤1: 初始化Git仓库
+git init
+git branch -M main
+
+# 步骤2: 准备部署文件
+mkdir -p docs
+cp tongxu/实时资讯.html docs/index.html
+touch docs/.nojekyll
+
+# 步骤3: 配置Git用户信息（可选）
+git config user.name "silencetree346"
+git config user.email "silencetree346@users.noreply.github.com"
+
+# 步骤4: 配置远程仓库（使用Token）
+git remote add origin https://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@github.com/silencetree346/tongxu.git
+
+# 步骤5: 添加所有文件
+git add .
+
+# 步骤6: 提交
+git commit -m "Initial commit: 部署全球智讯日报到GitHub Pages"
+
+# 步骤7: 推送到GitHub
+git push -u origin main
+
+# 步骤8: 推送成功后，移除Token（安全考虑）
+git remote set-url origin https://github.com/silencetree346/tongxu.git
+
+# ==========================================
+# ✅ 推送成功后，配置GitHub Pages：
+# ==========================================
+# 
+# 1. 访问: https://github.com/silencetree346/tongxu/settings/pages
+# 
+# 2. 配置：
+#    - Source: Deploy from a branch
+#    - Branch: main
+#    - Folder: /docs
+#    - 点击 Save
+# 
+# 3. 等待1-2分钟后，访问：
+#    https://silencetree346.github.io/tongxu/
+#
+

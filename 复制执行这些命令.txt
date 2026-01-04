@@ -1,0 +1,49 @@
+# ==========================================
+# 🚀 推送项目到GitHub - 复制执行这些命令
+# ==========================================
+# 
+# 请复制以下所有命令到终端执行
+#
+
+cd /Users/luckincoffee/test
+
+# 初始化Git仓库
+git init
+git branch -M main
+
+# 配置远程仓库（使用Token）
+git remote remove origin
+git remote add origin https://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@github.com/silencetree346/tongxu.git
+
+# 确保部署文件最新
+cp tongxu/实时资讯.html docs/index.html
+touch docs/.nojekyll
+
+# 添加所有文件
+git add .
+
+# 提交
+git commit -m "Deploy: 推送项目到GitHub Pages"
+
+# 推送到GitHub
+git push -u origin main
+
+# 推送成功后，移除Token（安全考虑）
+git remote set-url origin https://github.com/silencetree346/tongxu.git
+
+# ==========================================
+# ✅ 推送成功后，配置GitHub Pages：
+# ==========================================
+# 
+# 1. 访问: https://github.com/silencetree346/tongxu/settings/pages
+# 
+# 2. 配置：
+#    - Source: Deploy from a branch
+#    - Branch: main
+#    - Folder: /docs
+#    - 点击 Save
+# 
+# 3. 等待1-2分钟后，访问：
+#    https://silencetree346.github.io/tongxu/
+#
+

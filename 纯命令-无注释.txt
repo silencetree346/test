@@ -1,0 +1,14 @@
+cd /Users/luckincoffee/test
+git init
+git branch -M main
+mkdir -p docs
+cp tongxu/实时资讯.html docs/index.html
+touch docs/.nojekyll
+git config user.name "silencetree346"
+git config user.email "silencetree346@users.noreply.github.com"
+git remote add origin https://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@github.com/silencetree346/tongxu.git
+git add .
+git commit -m "Initial commit: 部署全球智讯日报到GitHub Pages"
+git push -u origin main
+git remote set-url origin https://github.com/silencetree346/tongxu.git
+

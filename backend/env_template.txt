@@ -1,0 +1,14 @@
+OPENAI_API_KEY=sk-your-openai-api-key-here
+# 支持 OpenAI 或 DeepSeek API Key（DeepSeek: sk-xxxxx）
+NEWS_API_KEY=your-news-api-key-here
+
+EMAIL_ENABLED=false
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+RECIPIENT_EMAILS=recipient1@example.com,recipient2@example.com
+
+DAILY_REPORT_HOUR=9
+DAILY_REPORT_MINUTE=0
+

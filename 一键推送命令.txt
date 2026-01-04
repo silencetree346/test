@@ -1,0 +1,23 @@
+# 复制以下所有命令到终端执行
+
+cd /Users/luckincoffee/test
+
+# 配置远程仓库（使用您的Token）
+git remote set-url origin https://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@github.com/silencetree346/tongxu.git
+
+# 更新文件
+cp tongxu/实时资讯.html docs/index.html
+touch docs/.nojekyll
+
+# 添加所有文件
+git add .
+
+# 提交
+git commit -m "Deploy: 部署全球智讯日报到GitHub Pages"
+
+# 推送
+git push -u origin main
+
+# 推送成功后，移除Token（安全考虑）
+git remote set-url origin https://github.com/silencetree346/tongxu.git
+

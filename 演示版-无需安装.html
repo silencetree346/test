@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日调研分析报告 - 咖啡行业</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .demo-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .status {
+            flex: 1;
+            text-align: right;
+            color: #4a5568;
+            font-size: 0.95em;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .report-header {
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .report-date {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .news-item {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .news-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .news-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 15px;
+            color: #718096;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .news-summary {
+            color: #4a5568;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .analysis-box {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 15px;
+            padding: 30px;
+            line-height: 1.8;
+            color: #2d3748;
+            font-size: 1.05em;
+            margin-bottom: 30px;
+        }
+
+        .recommendations {
+            display: grid;
+            gap: 15px;
+        }
+
+        .recommendation-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #48bb78;
+            display: flex;
+            gap: 15px;
+            align-items: start;
+            transition: all 0.3s;
+        }
+
+        .recommendation-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.2);
+        }
+
+        .recommendation-number {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .recommendation-text {
+            flex: 1;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>☕ 每日调研分析报告</h1>
+            <p>聚全球之势 · 析深层之理 · 领未来之道</p>
+            <div class="demo-badge">✨ 演示版 - 使用模拟数据</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" @click="generateReport" :disabled="loading">
+                <span>🔄</span>
+                <span>{{ loading ? '生成中...' : '立即生成报告' }}</span>
+            </button>
+            <div class="status">
+                {{ statusMessage }}
+            </div>
+        </div>
+
+        <div v-if="loading" class="report-card">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>正在生成报告，请稍候...</p>
+            </div>
+        </div>
+
+        <div v-else-if="currentReport" class="report-card">
+            <div class="report-header">
+                <span class="report-date">📅 {{ currentReport.date }}</span>
+                <h2 style="margin-top: 15px; color: #2d3748;">今日咖啡行业调研分析报告</h2>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">📰 今日要闻</h3>
+                <div class="news-grid">
+                    <div v-for="(news, index) in currentReport.news_items" :key="index" class="news-item">
+                        <div class="news-title">{{ news.title }}</div>
+                        <div class="news-meta">
+                            <span>📌 {{ news.source }}</span>
+                            <span>🕒 {{ news.publish_date }}</span>
+                        </div>
+                        <div class="news-summary">
+                            {{ news.summary }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">📊 深度分析</h3>
+                <div class="analysis-box">
+                    {{ currentReport.analysis }}
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">💡 战略建议</h3>
+                <div class="recommendations">
+                    <div v-for="(rec, index) in currentReport.recommendations" :key="index" class="recommendation-item">
+                        <div class="recommendation-number">{{ index + 1 }}</div>
+                        <div class="recommendation-text">{{ rec }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentReport: null,
+                    loading: false,
+                    statusMessage: '演示版已就绪 - 点击按钮查看示例报告'
+                };
+            },
+            mounted() {
+                console.log('演示版应用已加载');
+            },
+            methods: {
+                generateReport() {
+                    this.loading = true;
+                    this.statusMessage = '正在生成报告...';
+                    
+                    // 模拟网络延迟
+                    setTimeout(() => {
+                        const today = new Date().toISOString().split('T')[0];
+                        
+                        this.currentReport = {
+                            date: today,
+                            news_items: [
+                                {
+                                    title: "瑞幸咖啡Q4财报超预期，门店数突破15000家",
+                                    source: "腾讯新闻",
+                                    publish_date: today,
+                                    summary: "瑞幸咖啡公布2024年Q4财报，总营收同比增长85%，门店总数突破15000家，继续领跑中国咖啡连锁市场。公司表示将继续深化下沉市场布局。"
+                                },
+                                {
+                                    title: "星巴克中国推出AI智能点单系统，提升客户体验",
+                                    source: "36氪",
+                                    publish_date: today,
+                                    summary: "星巴克中国宣布在全国门店推广AI智能点单系统，通过机器学习算法为顾客提供个性化推荐，预计将客单价提升15%。"
+                                },
+                                {
+                                    title: "精品咖啡市场年增长率达30%，消费升级趋势明显",
+                                    source: "第一财经",
+                                    publish_date: today,
+                                    summary: "市场研究显示，中国精品咖啡市场2024年增长率达30%，远超整体咖啡市场。年轻消费者更注重咖啡品质和体验，愿意为高品质咖啡支付溢价。"
+                                },
+                                {
+                                    title: "冷萃咖啡成新宠，即饮咖啡市场规模突破500亿",
+                                    source: "新浪财经",
+                                    publish_date: today,
+                                    summary: "数据显示，即饮咖啡市场规模已突破500亿元，其中冷萃咖啡增速最快。各大品牌纷纷推出冷萃新品，争夺年轻消费者市场。"
+                                },
+                                {
+                                    title: "咖啡豆价格波动，供应链管理成行业关键",
+                                    source: "财经网",
+                                    publish_date: today,
+                                    summary: "受气候变化影响，全球咖啡豆价格出现波动。业内人士指出，建立稳定的供应链和采购渠道，将成为咖啡企业竞争的关键因素。"
+                                },
+                                {
+                                    title: "可持续发展成咖啡行业新标准，消费者更关注环保",
+                                    source: "虎嗅",
+                                    publish_date: today,
+                                    summary: "调研显示，超过70%的消费者表示愿意为采用可持续采购的咖啡品牌支付更高价格。各大品牌加速ESG布局，推动行业绿色转型。"
+                                },
+                                {
+                                    title: "咖啡+社交成新模式，第三空间价值凸显",
+                                    source: "钛媒体",
+                                    publish_date: today,
+                                    summary: "疫情后，咖啡馆作为'第三空间'的社交价值重新被发现。品牌通过打造特色空间和社区活动，提升客户粘性和复购率。"
+                                },
+                                {
+                                    title: "咖啡行业数字化转型加速，小程序订单占比超50%",
+                                    source: "界面新闻",
+                                    publish_date: today,
+                                    summary: "数据显示，主流咖啡品牌小程序订单占比已超50%。数字化不仅提升了运营效率，还为精准营销和用户运营提供了数据支持。"
+                                },
+                                {
+                                    title: "下沉市场成咖啡新蓝海，三四线城市增速显著",
+                                    source: "南方都市报",
+                                    publish_date: today,
+                                    summary: "三四线城市咖啡消费增速达40%，远超一二线城市。品牌纷纷布局下沉市场，通过差异化定价和本地化运营抢占份额。"
+                                },
+                                {
+                                    title: "植物基咖啡饮品兴起，健康趋势引领产品创新",
+                                    source: "食品观察",
+                                    publish_date: today,
+                                    summary: "燕麦奶、椰奶等植物基咖啡饮品受到追捧。健康、低卡路里成为产品开发新方向，满足消费者对健康生活方式的追求。"
+                                }
+                            ],
+                            analysis: "基于当前市场动态，中国咖啡行业呈现出以下五大核心特征：\n\n首先，市场规模持续扩张，增速领跑全球。瑞幸、星巴克等头部品牌门店数量激增，行业竞争进入白热化阶段。消费升级驱动精品咖啡市场年增长率达30%，远超行业平均水平。\n\n其次，产品创新成为差异化竞争关键。冷萃咖啡、植物基饮品等新品类快速崛起，即饮咖啡市场突破500亿规模。品牌通过持续创新满足多元化消费需求，提升市场份额。\n\n第三，数字化转型深度推进。AI智能点单、小程序订单占比超50%，数字化不仅优化运营效率，更为精准营销和用户画像提供数据支撑，成为品牌核心竞争力。\n\n第四，下沉市场潜力巨大。三四线城市咖啡消费增速达40%，成为行业新蓝海。品牌通过本地化运营和灵活定价策略，加速渠道下沉布局。\n\n最后，可持续发展成为行业共识。消费者环保意识提升，超70%愿为绿色品牌支付溢价。ESG理念融入供应链管理，推动行业向高质量发展转型。综合来看，中国咖啡市场正从规模扩张向质量提升、从单一竞争向生态构建转变。",
+                            recommendations: [
+                                "加大精品咖啡豆采购和烘焙技术投入，建立差异化产品体系。与优质产地建立长期合作，确保豆源稳定性；投资烘焙设备和培训专业咖啡师，打造高品质产品形象，满足消费升级需求。",
+                                "全面推进数字化转型，构建智能化运营体系。升级小程序和APP功能，优化用户体验；引入AI推荐系统和数据分析工具，实现精准营销；建立会员体系和积分系统，提升用户粘性和复购率。",
+                                "积极布局下沉市场，采用灵活的加盟和直营模式。针对三四线城市制定差异化定价策略；简化门店模型降低开店成本；加强本地化运营，结合区域消费特点推出定制产品。",
+                                "强化供应链管理和ESG认证，提升品牌价值。建立可追溯的绿色供应链体系；获取公平贸易和有机认证；推广环保包装和可循环杯具；将可持续理念融入品牌传播，吸引环保意识消费者。",
+                                "打造第三空间和社交场景，提升品牌溢价能力。优化门店设计营造舒适氛围；举办咖啡品鉴、艺术展览等社区活动；与本地文化IP合作推出联名产品；通过社交媒体运营构建品牌社群，增强用户归属感。"
+                            ]
+                        };
+                        
+                        this.loading = false;
+                        this.statusMessage = `报告生成成功 · ${today}`;
+                        
+                    }, 1500);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+
