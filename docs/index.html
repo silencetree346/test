@@ -639,13 +639,42 @@
                 // 清理HTML标签和实体
                 cleanText(text) {
                     if (!text) return '';
+                    
+                    // 处理CDATA内容
+                    text = text.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1');
+                    
                     // 创建临时div来解析HTML实体
                     const tmp = document.createElement('div');
                     tmp.innerHTML = text;
-                    // 获取纯文本并清理
+                    
+                    // 获取纯文本
                     let cleaned = tmp.textContent || tmp.innerText || '';
+                    
+                    // 解码常见的HTML实体
+                    const entities = {
+                        '&amp;': '&',
+                        '&lt;': '<',
+                        '&gt;': '>',
+                        '&quot;': '"',
+                        '&apos;': "'",
+                        '&nbsp;': ' ',
+                        '&#39;': "'",
+                        '&#8217;': "'",
+                        '&#8220;': '"',
+                        '&#8221;': '"',
+                        '&#8211;': '-',
+                        '&#8212;': '—',
+                        '&hellip;': '...'
+                    };
+                    
+                    // 替换HTML实体
+                    Object.keys(entities).forEach(entity => {
+                        cleaned = cleaned.replace(new RegExp(entity, 'g'), entities[entity]);
+                    });
+                    
                     // 清理多余的空白字符
                     cleaned = cleaned.replace(/\s+/g, ' ').trim();
+                    
                     return cleaned;
                 },
                 
@@ -989,20 +1018,45 @@
                             const rss36krData = await fetchWithProxy('https://36kr.com/feed', '36氪');
                             const parser = new DOMParser();
                             const xmlDoc = parser.parseFromString(rss36krData, 'text/xml');
+                            
+                            // 检查解析错误
+                            const parserError = xmlDoc.querySelector('parsererror');
+                            if (parserError) {
+                                console.log('⚠️ 36氪RSS XML解析错误:', parserError.textContent);
+                            }
+                            
                             const items = xmlDoc.querySelectorAll('item');
+                            console.log(`🔍 36氪RSS: XML解析成功，找到 ${items.length} 个item节点`);
                             
                             let totalItems = 0;
                             let matchedItems = 0;
                             
-                            items.forEach(item => {
-                                let title = item.querySelector('title')?.textContent || '';
-                                let link = item.querySelector('link')?.textContent || '#';
-                                let pubDate = item.querySelector('pubDate')?.textContent || '';
-                                let description = item.querySelector('description')?.textContent || '';
+                            items.forEach((item, idx) => {
+                                // 尝试多种方式获取标题和描述
+                                let title = item.querySelector('title')?.textContent || 
+                                          item.querySelector('title')?.innerHTML || 
+                                          item.getElementsByTagName('title')[0]?.textContent || '';
                                 
-                                // 解码HTML实体
+                                let link = item.querySelector('link')?.textContent || 
+                                          item.getElementsByTagName('link')[0]?.textContent || '#';
+                                
+                                let pubDate = item.querySelector('pubDate')?.textContent || 
+                                             item.getElementsByTagName('pubDate')[0]?.textContent || '';
+                                
+                                let description = item.querySelector('description')?.textContent || 
+                                                 item.getElementsByTagName('description')[0]?.textContent || '';
+                                
+                                // 解码HTML实体（多次处理确保完全解码）
                                 title = this.cleanText(title);
                                 description = this.cleanText(description);
+                                
+                                // 如果标题仍然包含HTML实体，再次清理
+                                if (title.includes('&') || title.includes('<') || title.includes('>')) {
+                                    title = this.cleanText(title);
+                                }
+                                if (description.includes('&') || description.includes('<') || description.includes('>')) {
+                                    description = this.cleanText(description);
+                                }
                                 
                                 if (!title) return;
                                 totalItems++;
