@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Intelligence Daily - 全球智讯日报</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -480,11 +480,7 @@
                 </div>
             </div>
 
-            <div class="section">
-                <h3 class="section-title">📊 AI 深度分析</h3>
-                <div class="analysis-box" v-html="currentReport.analysis">
-                </div>
-            </div>
+            <!-- AI 深度分析已暂时禁用以提升速度 -->
 
             <div class="section">
                 <h3 class="section-title">💡 深度洞察</h3>
@@ -799,7 +795,7 @@
                 async fetchRealNews() {
                     console.log('🚀 开始获取实时资讯...');
                     
-                    // 检查缓存（10分钟内的数据直接使用）
+                    // 检查缓存（5分钟内的数据直接使用）
                     const cacheKey = 'coffee_news_cache';
                     const cacheTimeKey = 'coffee_news_cache_time';
                     const cacheData = localStorage.getItem(cacheKey);
@@ -807,10 +803,14 @@
                     
                     if (cacheData && cacheTime) {
                         const cacheAge = Date.now() - parseInt(cacheTime);
-                        if (cacheAge < 10 * 60 * 1000) { // 10分钟缓存
-                            console.log('✅ 使用缓存数据（', Math.round(cacheAge / 1000), '秒前）');
-                            this.loadingMessage = '正在加载缓存数据...';
+                        const secondsAgo = Math.round(cacheAge / 1000);
+                        
+                        if (cacheAge < 5 * 60 * 1000) { // 5分钟缓存
+                            console.log(`⚡ 使用缓存数据（${secondsAgo}秒前），秒开！`);
+                            this.loadingMessage = '⚡ 正在加载缓存...';
                             return JSON.parse(cacheData);
+                        } else {
+                            console.log(`🔄 缓存已过期（${Math.round(cacheAge / 60000)}分钟），获取最新数据...`);
                         }
                     }
                     
@@ -837,11 +837,11 @@
                                 q: 'coffee OR starbucks OR cafe OR espresso OR latte',
                                 'from-date': fromDate,
                                 'to-date': toDate,
-                                'page-size': 30,
+                                'page-size': 20,  // 减少数量加快速度
                                 'show-fields': 'trailText',
                                 'api-key': guardianApiKey
                             },
-                            timeout: 10000
+                            timeout: 5000  // 减少超时时间到5秒
                         });
                         
                         console.log('📡 API 响应状态:', response.status);
@@ -1032,9 +1032,10 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                 },
                 
                 generateAnalysis(newsItems) {
-                    return `<div style="text-align: center; margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
-    <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">基于 ${newsItems.length} 条资讯的三层分析</div>
-    <div style="font-size: 14px; opacity: 0.9;">行业层面 × 市场层面 × 公司层面 | 人-货-场三维框架</div>
+                    // 简化版分析，快速生成
+                    return `<div style="text-align: center; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+    <div style="font-size: 16px; font-weight: 600;">📊 基于 ${newsItems.length} 条资讯的快速分析</div>
+    <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">人-货-场三维框架</div>
 </div>
 
 <table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -1470,8 +1471,7 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                             return;
                         }
                         
-                        this.loadingMessage = 'AI 正在分析资讯内容...';
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        this.loadingMessage = '⚡ 正在整理资讯...';
                         
                         const now = new Date();
                         const today = now.toISOString().split('T')[0];
@@ -1496,11 +1496,12 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                             date: today,
                             collectTime: collectTime,
                             news_items: newsItems,
-                            analysis: this.generateAnalysis(newsItems),
+                            analysis: '', // 暂时禁用复杂分析，提升速度
                             recommendations: this.generateRecommendations()
                         };
                         
                         this.statusMessage = `✅ 成功获取 ${newsItems.length} 条资讯（今日0点后）· ${collectTime}`;
+                        this.loading = false; // 关闭加载状态
                         
                     } catch (error) {
                         console.error('获取资讯失败:', error);
@@ -1633,10 +1634,10 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                 }
             },
             mounted() {
-                // 页面加载完成后检查缓存
-                console.log('页面已加载');
+                // 页面加载完成，不自动加载
+                console.log('⚡ 页面已就绪，等待用户操作');
                 
-                // 尝试从缓存快速加载
+                // 检查缓存状态，只显示提示
                 const cacheKey = 'coffee_news_cache';
                 const cacheTimeKey = 'coffee_news_cache_time';
                 const cacheData = localStorage.getItem(cacheKey);
@@ -1646,15 +1647,15 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                     const cacheAge = Date.now() - parseInt(cacheTime);
                     const minutesAgo = Math.round(cacheAge / 60000);
                     
-                    if (cacheAge < 30 * 60 * 1000) { // 30分钟内的缓存自动加载
-                        console.log(`⚡ 发现缓存数据（${minutesAgo}分钟前），自动加载...`);
-                        this.statusMessage = `使用缓存数据（${minutesAgo}分钟前更新）`;
-                        this.generateReport();
+                    if (minutesAgo < 10) {
+                        this.statusMessage = `💾 有${minutesAgo}分钟前的缓存，点击按钮快速加载`;
+                    } else if (minutesAgo < 60) {
+                        this.statusMessage = `⚠️ 缓存已${minutesAgo}分钟，建议点击按钮获取最新资讯`;
                     } else {
-                        this.statusMessage = `缓存已过期（${minutesAgo}分钟前），点击按钮获取最新资讯`;
+                        this.statusMessage = `点击按钮获取今日最新咖啡资讯`;
                     }
                 } else {
-                    this.statusMessage = '点击按钮获取最新咖啡行业资讯';
+                    this.statusMessage = '👆 点击按钮获取今日咖啡资讯';
                 }
             }
         }).mount('#app');
