@@ -629,6 +629,26 @@
                 }
             },
             methods: {
+                // HTML实体解码函数
+                decodeHTML(html) {
+                    const txt = document.createElement('textarea');
+                    txt.innerHTML = html;
+                    return txt.value;
+                },
+                
+                // 清理HTML标签和实体
+                cleanText(text) {
+                    if (!text) return '';
+                    // 创建临时div来解析HTML实体
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = text;
+                    // 获取纯文本并清理
+                    let cleaned = tmp.textContent || tmp.innerText || '';
+                    // 清理多余的空白字符
+                    cleaned = cleaned.replace(/\s+/g, ' ').trim();
+                    return cleaned;
+                },
+                
                 // 获取模拟数据（用于展示效果）
                 getMockNewsData() {
                     const today = new Date().toISOString().split('T')[0];
@@ -975,10 +995,14 @@
                             let matchedItems = 0;
                             
                             items.forEach(item => {
-                                const title = item.querySelector('title')?.textContent || '';
-                                const link = item.querySelector('link')?.textContent || '#';
-                                const pubDate = item.querySelector('pubDate')?.textContent || '';
-                                const description = item.querySelector('description')?.textContent || '';
+                                let title = item.querySelector('title')?.textContent || '';
+                                let link = item.querySelector('link')?.textContent || '#';
+                                let pubDate = item.querySelector('pubDate')?.textContent || '';
+                                let description = item.querySelector('description')?.textContent || '';
+                                
+                                // 解码HTML实体
+                                title = this.cleanText(title);
+                                description = this.cleanText(description);
                                 
                                 if (!title) return;
                                 totalItems++;
@@ -1032,10 +1056,14 @@
                             let matchedItems = 0;
                             
                             items.forEach(item => {
-                                const title = item.querySelector('title')?.textContent || '';
-                                const link = item.querySelector('link')?.textContent || '#';
-                                const pubDate = item.querySelector('pubDate')?.textContent || '';
-                                const description = item.querySelector('description')?.textContent || '';
+                                let title = item.querySelector('title')?.textContent || '';
+                                let link = item.querySelector('link')?.textContent || '#';
+                                let pubDate = item.querySelector('pubDate')?.textContent || '';
+                                let description = item.querySelector('description')?.textContent || '';
+                                
+                                // 解码HTML实体
+                                title = this.cleanText(title);
+                                description = this.cleanText(description);
                                 
                                 if (!title) return;
                                 totalItems++;
@@ -1085,10 +1113,14 @@
                             let matchedItems = 0;
                             
                             items.forEach(item => {
-                                const title = item.querySelector('title')?.textContent || '';
-                                const link = item.querySelector('link')?.textContent || '#';
-                                const pubDate = item.querySelector('pubDate')?.textContent || '';
-                                const description = item.querySelector('description')?.textContent || '';
+                                let title = item.querySelector('title')?.textContent || '';
+                                let link = item.querySelector('link')?.textContent || '#';
+                                let pubDate = item.querySelector('pubDate')?.textContent || '';
+                                let description = item.querySelector('description')?.textContent || '';
+                                
+                                // 解码HTML实体
+                                title = this.cleanText(title);
+                                description = this.cleanText(description);
                                 
                                 if (!title) return;
                                 totalItems++;
@@ -1138,10 +1170,14 @@
                             let matchedItems = 0;
                             
                             items.forEach(item => {
-                                const title = item.querySelector('title')?.textContent || '';
-                                const link = item.querySelector('link')?.textContent || '#';
-                                const pubDate = item.querySelector('pubDate')?.textContent || '';
-                                const description = item.querySelector('description')?.textContent || '';
+                                let title = item.querySelector('title')?.textContent || '';
+                                let link = item.querySelector('link')?.textContent || '#';
+                                let pubDate = item.querySelector('pubDate')?.textContent || '';
+                                let description = item.querySelector('description')?.textContent || '';
+                                
+                                // 解码HTML实体
+                                title = this.cleanText(title);
+                                description = this.cleanText(description);
                                 
                                 if (!title) return;
                                 totalItems++;
@@ -1303,13 +1339,19 @@
                                     // 只有包含行业关键词且不包含排除关键词的才保留
                                     return hasIndustryKeyword && !hasExcludeKeyword;
                                 })
-                                .map(article => ({
-                                    title: article.webTitle,
-                                    url: article.webUrl,
-                                    source: 'The Guardian',
-                                    publish_date: article.webPublicationDate.split('T')[0],
-                                    summary: article.fields?.trailText || article.webTitle.substring(0, 150)
-                                }));
+                                .map(article => {
+                                    // 清理HTML实体编码
+                                    const title = this.cleanText(article.webTitle || '');
+                                    const summary = this.cleanText(article.fields?.trailText || article.webTitle || '');
+                                    
+                                    return {
+                                        title: title,
+                                        url: article.webUrl,
+                                        source: 'The Guardian',
+                                        publish_date: article.webPublicationDate.split('T')[0],
+                                        summary: summary.substring(0, 150) || title
+                                    };
+                                });
                             
                             allNews.push(...guardianResults);
                             console.log(`✅ 从 ${totalResults} 条中筛选出 ${guardianResults.length} 条咖啡奶茶行业资讯`);
