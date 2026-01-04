@@ -350,26 +350,36 @@
         <div style="margin-top: 15px; padding: 12px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 8px; border-left: 4px solid #2196f3;">
             <div style="display: flex; align-items: center; margin-bottom: 8px;">
                 <span style="font-size: 18px; margin-right: 8px;">ℹ️</span>
-                <span style="font-weight: 600; color: #1976d2; font-size: 14px;">资讯来源说明</span>
+                <span style="font-weight: 600; color: #1976d2; font-size: 14px;">资讯来源配置</span>
             </div>
             <div style="font-size: 13px; color: #555; line-height: 1.6;">
-                <div style="margin-bottom: 6px;">
-                    <strong>🌍 国际资讯：</strong>The Guardian（英国卫报）- 免费API，自动获取
-                </div>
-                <div style="margin-bottom: 6px;">
-                    <strong>🇨🇳 国内资讯：</strong>需要配置后端API代理
-                </div>
-                <div style="padding: 8px; background: white; border-radius: 4px; margin-top: 8px;">
-                    <div style="font-weight: 600; color: #2196f3; margin-bottom: 4px;">💡 推荐国内资讯源：</div>
-                    <div style="font-size: 12px; color: #666;">
-                        • <strong>36氪</strong>：科技创投视角，关注新消费品牌<br>
+                <div style="padding: 10px; background: white; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-weight: 600; color: #2196f3; margin-bottom: 6px;">🇨🇳 国内资讯源（需配置后端）：</div>
+                    <div style="font-size: 12px; color: #666; line-height: 1.8;">
+                        • <strong>36氪</strong>：科技创投视角，新消费品牌动态<br>
                         • <strong>虎嗅</strong>：深度商业分析，行业洞察<br>
-                        • <strong>咖门</strong>：咖啡行业垂直媒体<br>
-                        • <strong>艾瑞咨询</strong>：专业市场研究报告
+                        • <strong>腾讯新闻</strong>：主流新闻平台，覆盖面广<br>
+                        • <strong>艾瑞咨询</strong>：专业市场研究报告<br>
+                        • <strong>百度资讯</strong>：综合资讯平台
                     </div>
                 </div>
-                <div style="margin-top: 8px; font-size: 12px; color: #666;">
-                    📖 查看 <a href="./国内资讯配置指南.md" target="_blank" style="color: #2196f3; text-decoration: underline;">《国内资讯配置指南》</a> 了解如何配置
+                <div style="padding: 10px; background: white; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-weight: 600; color: #2196f3; margin-bottom: 6px;">🌍 国际资讯源：</div>
+                    <div style="font-size: 12px; color: #666; line-height: 1.8;">
+                        • <strong>纽约时报</strong>（New York Times）：权威财经报道<br>
+                        • <strong>华尔街日报</strong>（Wall Street Journal）：商业金融深度<br>
+                        • <strong>金融时报</strong>（Financial Times）：全球商业视角<br>
+                        • <strong>哈佛商业评论</strong>（HBR）：管理战略洞察<br>
+                        • <strong>星巴克官网</strong>：官方新闻发布
+                    </div>
+                </div>
+                <div style="padding: 8px; background: #fff3e0; border-radius: 4px; border-left: 3px solid #ff9800;">
+                    <div style="font-size: 12px; color: #e65100; font-weight: 600; margin-bottom: 4px;">⚡ 快速配置：</div>
+                    <div style="font-size: 11px; color: #666;">
+                        1. 查看 <a href="./指定资讯源配置指南.md" target="_blank" style="color: #2196f3; text-decoration: underline;">《指定资讯源配置指南》</a><br>
+                        2. 5分钟配置后端API<br>
+                        3. 自动获取10大资讯源
+                    </div>
                 </div>
             </div>
         </div>
@@ -1000,28 +1010,31 @@
                     return allNews;
                 },
                 
-                // 获取国内咖啡资讯（需要后端支持）
+                // 获取指定资讯源（需要后端支持）
                 async fetchChineseNews() {
-                    console.log('🇨🇳 尝试获取国内咖啡资讯...');
+                    console.log('🌐 尝试获取指定资讯源...');
                     
-                    // 注意：由于浏览器的CORS限制，无法直接从前端访问大多数国内新闻网站
-                    // 需要配置后端API代理来获取国内资讯
+                    // 注意：由于浏览器的CORS限制，无法直接从前端访问这些网站
+                    // 需要配置后端API代理来获取资讯
                     
-                    const chineseNews = [];
+                    const allNews = [];
                     
-                    // 方案1：使用 RSS 聚合服务（如果有的话）
-                    // 方案2：配置后端API代理
-                    // 方案3：使用支持CORS的中文新闻API
+                    // 配置的资讯源列表：
+                    // 🇨🇳 国内：36氪、虎嗅、腾讯新闻、艾瑞咨询、百度资讯
+                    // 🌍 国际：纽约时报、华尔街日报、金融时报、哈佛商业评论、星巴克官网
                     
-                    // 这里提供一个示例结构，实际需要后端支持
-                    // const backendUrl = '/api/chinese-coffee-news';
+                    // 后端API示例（需要配置）：
+                    // const backendUrl = 'http://localhost:3001/api/coffee-news-sources';
                     // const response = await axios.get(backendUrl);
-                    // chineseNews.push(...response.data);
+                    // allNews.push(...response.data);
                     
-                    console.log('⚠️ 国内资讯源需要配置后端API');
-                    console.log('💡 建议资讯源：36氪、虎嗅、钛媒体、艾瑞咨询、咖门、品牌星球');
+                    console.log('⚠️ 指定资讯源需要配置后端API');
+                    console.log('📋 资讯源列表：');
+                    console.log('   🇨🇳 国内：36氪、虎嗅、腾讯、艾瑞咨询、百度');
+                    console.log('   🌍 国际：NYT、WSJ、FT、HBR、星巴克官网');
+                    console.log('💡 查看《指定资讯源配置指南.md》了解配置方法');
                     
-                    return chineseNews;
+                    return allNews;
                 },
                 
                 generateAnalysis_old(newsItems) {
@@ -1224,6 +1237,159 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                         `).join('');
                     };
                     
+                    // 生成业务洞见（营销增长、供应链管理、门店运营）
+                    const generateBusinessInsights = () => {
+                        const allText = newsItems.map(item => (item.title + ' ' + item.summary).toLowerCase()).join(' ');
+                        
+                        // 业务关键词匹配
+                        const businessKeywords = {
+                            marketing: {
+                                keywords: ['marketing', 'brand', 'customer', 'user', 'consumer', '营销', '品牌', '用户', '会员', 'loyalty', 'campaign'],
+                                count: 0,
+                                news: []
+                            },
+                            supply: {
+                                keywords: ['supply', 'chain', 'bean', 'source', 'cost', 'price', '供应链', '咖啡豆', '成本', '采购', 'sustainable'],
+                                count: 0,
+                                news: []
+                            },
+                            store: {
+                                keywords: ['store', 'shop', 'location', 'expansion', 'opening', '门店', '开店', '扩张', 'outlet', 'branch'],
+                                count: 0,
+                                news: []
+                            }
+                        };
+                        
+                        // 匹配每条资讯到业务维度
+                        newsItems.forEach(item => {
+                            const text = (item.title + ' ' + item.summary).toLowerCase();
+                            for (let [business, data] of Object.entries(businessKeywords)) {
+                                if (data.keywords.some(kw => text.includes(kw.toLowerCase()))) {
+                                    data.count++;
+                                    data.news.push(item);
+                                }
+                            }
+                        });
+                        
+                        // 生成业务洞见
+                        const insights = [];
+                        
+                        // 1. 营销增长洞见
+                        if (businessKeywords.marketing.count > 0) {
+                            const peopleCompany = analysis.people.company;
+                            const peopleIndustry = analysis.people.industry;
+                            
+                            let insight = '📈 <strong>营销增长：</strong>';
+                            
+                            if (peopleCompany.length > 0) {
+                                insight += `关注头部企业的会员/品牌策略`;
+                                if (peopleIndustry.length > 0) {
+                                    insight += `，同时把握用户需求趋势`;
+                                }
+                            } else if (peopleIndustry.length > 0) {
+                                insight += `关注消费者趋势变化，提前布局`;
+                            } else {
+                                insight += `有 ${businessKeywords.marketing.count} 条相关资讯`;
+                            }
+                            
+                            insights.push(insight);
+                        }
+                        
+                        // 2. 供应链管理洞见
+                        if (businessKeywords.supply.count > 0) {
+                            const productMarket = analysis.product.market;
+                            const productCompany = analysis.product.company;
+                            
+                            let insight = '🔗 <strong>供应链管理：</strong>';
+                            
+                            if (productMarket.length > 0) {
+                                insight += `注意原料价格波动，做好成本对冲`;
+                                if (productCompany.length > 0) {
+                                    insight += `，学习标杆企业的采购策略`;
+                                }
+                            } else if (productCompany.length > 0) {
+                                insight += `参考头部企业的供应链优化经验`;
+                            } else {
+                                insight += `有 ${businessKeywords.supply.count} 条相关资讯`;
+                            }
+                            
+                            insights.push(insight);
+                        }
+                        
+                        // 3. 门店运营洞见
+                        if (businessKeywords.store.count > 0) {
+                            const placeCompany = analysis.place.company;
+                            const placeIndustry = analysis.place.industry;
+                            const placeMarket = analysis.place.market;
+                            
+                            let insight = '🏪 <strong>门店运营：</strong>';
+                            
+                            if (placeCompany.length > 0 && placeIndustry.length > 0) {
+                                insight += `行业扩张趋势明显，参考标杆企业选址策略`;
+                            } else if (placeCompany.length > 0) {
+                                insight += `关注头部企业的开店节奏和区域布局`;
+                            } else if (placeMarket.length > 0) {
+                                insight += `市场竞争加剧，优化门店坪效是关键`;
+                            } else if (placeIndustry.length > 0) {
+                                insight += `把握行业渠道变革趋势`;
+                            } else {
+                                insight += `有 ${businessKeywords.store.count} 条相关资讯`;
+                            }
+                            
+                            insights.push(insight);
+                        }
+                        
+                        return insights;
+                    };
+                    
+                    // 生成快速洞察（原总结）
+                    const generateQuickInsights = () => {
+                        const allText = newsItems.map(item => (item.title + ' ' + item.summary).toLowerCase()).join(' ');
+                        
+                        // 统计品牌和趋势
+                        const brands = {
+                            'starbucks': (allText.match(/starbucks/g) || []).length,
+                            'luckin': (allText.match(/luckin/g) || []).length,
+                            'costa': (allText.match(/costa/g) || []).length
+                        };
+                        
+                        const trends = {
+                            'growth': (allText.match(/growth|增长/g) || []).length,
+                            'expansion': (allText.match(/expansion|扩张|开店/g) || []).length,
+                            'innovation': (allText.match(/innovation|创新|new product/g) || []).length
+                        };
+                        
+                        const topBrands = Object.entries(brands).filter(([_, c]) => c > 0).sort((a, b) => b[1] - a[1]).slice(0, 2);
+                        const topTrends = Object.entries(trends).filter(([_, c]) => c > 0).sort((a, b) => b[1] - a[1]).slice(0, 2);
+                        
+                        const insights = [];
+                        
+                        // 统计层级
+                        const industryCount = analysis.people.industry.length + analysis.product.industry.length + analysis.place.industry.length;
+                        const companyCount = analysis.people.company.length + analysis.product.company.length + analysis.place.company.length;
+                        
+                        if (topBrands.length > 0) {
+                            const names = topBrands.map(([n]) => n.charAt(0).toUpperCase() + n.slice(1)).join('、');
+                            insights.push(`🏢 <strong>${names}</strong> 成为焦点`);
+                        }
+                        
+                        if (topTrends.length > 0) {
+                            const trendMap = {'growth': '增长', 'expansion': '扩张', 'innovation': '创新'};
+                            const names = topTrends.map(([n]) => trendMap[n] || n).join('、');
+                            insights.push(`🔥 <strong>${names}</strong> 是关键词`);
+                        }
+                        
+                        if (industryCount > 0) {
+                            insights.push(`📊 <strong>${industryCount}条</strong> 行业趋势报道`);
+                        }
+                        
+                        if (companyCount > 0) {
+                            insights.push(`🎯 <strong>${companyCount}条</strong> 企业动态`);
+                        }
+                        
+                        return insights;
+                    };
+                    
                     // 生成HTML - 3x3矩阵表格
                     return `<div style="text-align: center; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
     <div style="font-size: 16px; font-weight: 600;">📊 基于 ${newsItems.length} 条资讯的智能分析（人货场 × 行业市场公司）</div>
@@ -1328,6 +1494,63 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
             </tr>
         </tbody>
     </table>
+</div>
+
+<!-- 智能洞见 -->
+<div style="margin-top: 20px;">
+    <!-- 业务洞见 -->
+    <div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; border-left: 5px solid #4834d4; margin-bottom: 15px;">
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            <span style="font-size: 28px; margin-right: 10px;">💡</span>
+            <div>
+                <div style="font-size: 16px; font-weight: 700; color: white;">业务洞见</div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.9); margin-top: 2px;">基于资讯的三大业务维度分析</div>
+            </div>
+        </div>
+        <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+            ${(() => {
+                const businessInsights = generateBusinessInsights();
+                if (businessInsights.length === 0) {
+                    return '<div style="text-align: center; color: #999; padding: 10px;">暂无明确的业务洞见</div>';
+                }
+                return businessInsights.map((insight, index) => `
+                    <div style="margin-bottom: ${index < businessInsights.length - 1 ? '12px' : '0'}; padding: 12px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; border-left: 3px solid #667eea;">
+                        <div style="font-size: 14px; color: #2c3e50; line-height: 1.8;">
+                            ${insight}
+                        </div>
+                    </div>
+                `).join('');
+            })()}
+        </div>
+    </div>
+    
+    <!-- 快速洞察 -->
+    <div style="padding: 15px; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); border-radius: 10px; border-left: 5px solid #ff6b6b;">
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            <span style="font-size: 28px; margin-right: 10px;">🎯</span>
+            <div>
+                <div style="font-size: 16px; font-weight: 700; color: #d63031;">快速洞察</div>
+                <div style="font-size: 12px; color: #666; margin-top: 2px;">今日焦点一览</div>
+            </div>
+        </div>
+        <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+            ${(() => {
+                const quickInsights = generateQuickInsights();
+                if (quickInsights.length === 0) {
+                    return '<div style="text-align: center; color: #999; padding: 10px;">资讯信息较少，暂无洞察</div>';
+                }
+                return `<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${quickInsights.map(insight => `
+                        <div style="flex: 1; min-width: 200px; padding: 10px 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; border-left: 3px solid #667eea;">
+                            <div style="font-size: 13px; color: #2c3e50; line-height: 1.6;">
+                                ${insight}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+            })()}
+        </div>
+    </div>
 </div>
 
 <div style="margin-top: 15px; padding: 12px; background: #f0f7ff; border-radius: 8px; border-left: 4px solid #667eea;">
