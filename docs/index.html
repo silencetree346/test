@@ -1015,7 +1015,18 @@
                             const rssHuxiuData = await fetchWithProxy('https://www.huxiu.com/rss/0.xml', '虎嗅');
                             const parser = new DOMParser();
                             const xmlDoc = parser.parseFromString(rssHuxiuData, 'text/xml');
+                            
+                            // 检查解析错误
+                            const parserError = xmlDoc.querySelector('parsererror');
+                            if (parserError) {
+                                console.log('⚠️ 虎嗅RSS XML解析错误:', parserError.textContent);
+                                // 尝试不同的选择器
+                                const items = xmlDoc.querySelectorAll('item, entry, article');
+                                console.log(`🔍 虎嗅RSS: 找到 ${items.length} 个条目（使用备用选择器）`);
+                            }
+                            
                             const items = xmlDoc.querySelectorAll('item');
+                            console.log(`🔍 虎嗅RSS: XML解析成功，找到 ${items.length} 个item节点`);
                             
                             let totalItems = 0;
                             let matchedItems = 0;
@@ -1060,7 +1071,15 @@
                             const rssTmtData = await fetchWithProxy('https://www.tmtpost.com/rss.xml', '钛媒体');
                             const parser = new DOMParser();
                             const xmlDoc = parser.parseFromString(rssTmtData, 'text/xml');
+                            
+                            // 检查解析错误
+                            const parserError = xmlDoc.querySelector('parsererror');
+                            if (parserError) {
+                                console.log('⚠️ 钛媒体RSS XML解析错误:', parserError.textContent);
+                            }
+                            
                             const items = xmlDoc.querySelectorAll('item');
+                            console.log(`🔍 钛媒体RSS: XML解析成功，找到 ${items.length} 个item节点`);
                             
                             let totalItems = 0;
                             let matchedItems = 0;
@@ -1105,7 +1124,15 @@
                             const rssJiemianData = await fetchWithProxy('https://www.jiemian.com/rss.xml', '界面新闻');
                             const parser = new DOMParser();
                             const xmlDoc = parser.parseFromString(rssJiemianData, 'text/xml');
+                            
+                            // 检查解析错误
+                            const parserError = xmlDoc.querySelector('parsererror');
+                            if (parserError) {
+                                console.log('⚠️ 界面新闻RSS XML解析错误:', parserError.textContent);
+                            }
+                            
                             const items = xmlDoc.querySelectorAll('item');
+                            console.log(`🔍 界面新闻RSS: XML解析成功，找到 ${items.length} 个item节点`);
                             
                             let totalItems = 0;
                             let matchedItems = 0;
