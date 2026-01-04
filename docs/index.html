@@ -981,16 +981,10 @@
                         console.warn('⚠️ 资讯获取失败:', error.message);
                     }
                     
-                    // The Guardian API 已禁用
-                    // 如需获取国际资讯，请配置后端服务
-                    console.log('ℹ️ 国际资讯源已禁用');
-                    console.log('💡 如需获取资讯，请查看《指定资讯源配置指南.md》配置后端');
-                    
-                    /* 
-                    // 2. 获取国际资讯（The Guardian - 已禁用）
+                    // 获取国际资讯（The Guardian API - 可直接调用，无需后端）
                     this.loadingMessage = '正在获取国际咖啡资讯...';
                     try {
-                        const guardianApiKey = 'test';
+                        const guardianApiKey = 'test'; // 公共测试Key
                         
                         const now = new Date();
                         // 获取今天0点（当地时间）
@@ -998,7 +992,6 @@
                         const fromDate = todayStart.toISOString().split('T')[0];
                         const toDate = now.toISOString().split('T')[0];
                         
-                        const todayStartTime = todayStart.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
                         console.log('📅 时间范围：今日 00:00 至', now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
                         
                         // 精准搜索：只搜索咖啡奶茶行业
@@ -1020,11 +1013,11 @@
                                 q: searchQuery,
                                 'from-date': fromDate,
                                 'to-date': toDate,
-                                'page-size': 30,  // 增加数量以获取更多相关内容
+                                'page-size': 20,
                                 'show-fields': 'trailText,thumbnail',
                                 'api-key': guardianApiKey
                             },
-                            timeout: 8000  // 增加超时时间
+                            timeout: 8000
                         });
                         
                         console.log('📡 API 响应状态:', response.status);
@@ -1114,7 +1107,6 @@
                             console.error('❌ 无缓存可用');
                         }
                     }
-                    */
                     
                     // 按日期排序，最新的在前
                     if (allNews.length > 0) {
