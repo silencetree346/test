@@ -559,7 +559,7 @@
                     loading: false,
                     downloading: false,
                     error: null,
-                    statusMessage: '点击按钮获取最近3天实时资讯（国内+国际）',
+                    statusMessage: '⚡ 智能缓存 | 点击按钮获取最新资讯',
                     loadingMessage: '正在获取最近3天实时资讯...'
                 };
             },
@@ -797,33 +797,48 @@
                 },
                 
                 async fetchRealNews() {
-                    console.log('尝试获取实时资讯...');
+                    console.log('🚀 开始获取实时资讯...');
+                    
+                    // 检查缓存（10分钟内的数据直接使用）
+                    const cacheKey = 'coffee_news_cache';
+                    const cacheTimeKey = 'coffee_news_cache_time';
+                    const cacheData = localStorage.getItem(cacheKey);
+                    const cacheTime = localStorage.getItem(cacheTimeKey);
+                    
+                    if (cacheData && cacheTime) {
+                        const cacheAge = Date.now() - parseInt(cacheTime);
+                        if (cacheAge < 10 * 60 * 1000) { // 10分钟缓存
+                            console.log('✅ 使用缓存数据（', Math.round(cacheAge / 1000), '秒前）');
+                            this.loadingMessage = '正在加载缓存数据...';
+                            return JSON.parse(cacheData);
+                        }
+                    }
                     
                     // 使用 The Guardian API（完全免费，无域名限制）
-                    this.loadingMessage = '正在获取咖啡行业资讯（The Guardian）...';
+                    this.loadingMessage = '正在从 The Guardian 获取最新资讯...';
                     
                     const allNews = [];
                     
                     try {
-                        const guardianApiKey = 'test'; // The Guardian 允许使用 'test' 作为 API Key
+                        const guardianApiKey = 'test';
                         
                         const now = new Date();
                         const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
                         const fromDate = threeDaysAgo.toISOString().split('T')[0];
                         const toDate = now.toISOString().split('T')[0];
                         
-                        console.log('📅 The Guardian API 时间范围：', fromDate, '至', toDate);
+                        console.log('📅 时间范围：', fromDate, '至', toDate);
                         
                         const response = await axios.get('https://content.guardianapis.com/search', {
                             params: {
-                                q: 'coffee OR starbucks OR "coffee industry" OR "coffee market"',
+                                q: 'coffee OR starbucks OR "coffee industry"',
                                 'from-date': fromDate,
                                 'to-date': toDate,
-                                'page-size': 50,
-                                'show-fields': 'headline,trailText,thumbnail,shortUrl',
+                                'page-size': 25, // 减少到25条，加快速度
+                                'show-fields': 'trailText',
                                 'api-key': guardianApiKey
                             },
-                            timeout: 15000
+                            timeout: 8000 // 减少到8秒超时
                         });
                         
                         if (response.data.response && response.data.response.results && response.data.response.results.length > 0) {
@@ -834,40 +849,39 @@
                                     url: article.webUrl,
                                     source: 'The Guardian',
                                     publish_date: article.webPublicationDate.split('T')[0],
-                                    summary: article.fields?.trailText || article.webTitle.substring(0, 200)
+                                    summary: article.fields?.trailText || article.webTitle.substring(0, 150)
                                 }));
                             
                             allNews.push(...guardianResults);
-                            console.log(`✅ The Guardian：成功获取 ${guardianResults.length} 条咖啡行业资讯`);
+                            console.log(`✅ 成功获取 ${guardianResults.length} 条资讯`);
+                            
+                            // 保存到缓存
+                            try {
+                                localStorage.setItem(cacheKey, JSON.stringify(allNews));
+                                localStorage.setItem(cacheTimeKey, Date.now().toString());
+                                console.log('💾 已缓存数据');
+                            } catch (e) {
+                                console.warn('缓存保存失败:', e.message);
+                            }
                         } else {
-                            console.warn('⚠️ The Guardian 返回了0条结果');
+                            console.warn('⚠️ 未找到相关资讯');
                         }
                     } catch (error) {
-                        console.error('❌ The Guardian API 调用失败:', error.message);
-                        if (error.response) {
-                            console.error('   HTTP状态码:', error.response.status);
-                            console.error('   错误详情:', error.response.data);
+                        console.error('❌ API 调用失败:', error.message);
+                        
+                        // 如果API失败但有旧缓存，使用旧缓存
+                        if (cacheData) {
+                            console.log('🔄 使用旧缓存数据');
+                            return JSON.parse(cacheData);
                         }
                     }
                     
                     // 按日期排序，最新的在前
                     if (allNews.length > 0) {
-                        allNews.sort((a, b) => {
-                            const dateA = new Date(a.publish_date);
-                            const dateB = new Date(b.publish_date);
-                            return dateB - dateA;
-                        });
+                        allNews.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
                     }
                     
-                    console.log(`📊 最终获取 ${allNews.length} 条实时资讯`);
-                    
-                    if (allNews.length === 0) {
-                        console.warn('⚠️ 未能获取任何资讯');
-                        console.warn('💡 可能原因：');
-                        console.warn('   1. The Guardian 近期没有相关咖啡行业报道');
-                        console.warn('   2. 网络连接问题');
-                        console.warn('   3. API 服务暂时不可用');
-                    }
+                    console.log(`📊 最终获取 ${allNews.length} 条资讯`);
                     
                     return allNews;
                 },
@@ -1604,9 +1618,29 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                 }
             },
             mounted() {
-                // 页面加载完成后自动获取资讯
-                console.log('页面已加载，自动获取咖啡行业资讯...');
-                this.generateReport();
+                // 页面加载完成后检查缓存
+                console.log('页面已加载');
+                
+                // 尝试从缓存快速加载
+                const cacheKey = 'coffee_news_cache';
+                const cacheTimeKey = 'coffee_news_cache_time';
+                const cacheData = localStorage.getItem(cacheKey);
+                const cacheTime = localStorage.getItem(cacheTimeKey);
+                
+                if (cacheData && cacheTime) {
+                    const cacheAge = Date.now() - parseInt(cacheTime);
+                    const minutesAgo = Math.round(cacheAge / 60000);
+                    
+                    if (cacheAge < 30 * 60 * 1000) { // 30分钟内的缓存自动加载
+                        console.log(`⚡ 发现缓存数据（${minutesAgo}分钟前），自动加载...`);
+                        this.statusMessage = `使用缓存数据（${minutesAgo}分钟前更新）`;
+                        this.generateReport();
+                    } else {
+                        this.statusMessage = `缓存已过期（${minutesAgo}分钟前），点击按钮获取最新资讯`;
+                    }
+                } else {
+                    this.statusMessage = '点击按钮获取最新咖啡行业资讯';
+                }
             }
         }).mount('#app');
     </script>
