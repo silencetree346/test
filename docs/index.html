@@ -346,6 +346,34 @@
             </div>
         </div>
 
+        <!-- 资讯来源说明 -->
+        <div style="margin-top: 15px; padding: 12px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 8px; border-left: 4px solid #2196f3;">
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 18px; margin-right: 8px;">ℹ️</span>
+                <span style="font-weight: 600; color: #1976d2; font-size: 14px;">资讯来源说明</span>
+            </div>
+            <div style="font-size: 13px; color: #555; line-height: 1.6;">
+                <div style="margin-bottom: 6px;">
+                    <strong>🌍 国际资讯：</strong>The Guardian（英国卫报）- 免费API，自动获取
+                </div>
+                <div style="margin-bottom: 6px;">
+                    <strong>🇨🇳 国内资讯：</strong>需要配置后端API代理
+                </div>
+                <div style="padding: 8px; background: white; border-radius: 4px; margin-top: 8px;">
+                    <div style="font-weight: 600; color: #2196f3; margin-bottom: 4px;">💡 推荐国内资讯源：</div>
+                    <div style="font-size: 12px; color: #666;">
+                        • <strong>36氪</strong>：科技创投视角，关注新消费品牌<br>
+                        • <strong>虎嗅</strong>：深度商业分析，行业洞察<br>
+                        • <strong>咖门</strong>：咖啡行业垂直媒体<br>
+                        • <strong>艾瑞咨询</strong>：专业市场研究报告
+                    </div>
+                </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                    📖 查看 <a href="./国内资讯配置指南.md" target="_blank" style="color: #2196f3; text-decoration: underline;">《国内资讯配置指南》</a> 了解如何配置
+                </div>
+            </div>
+        </div>
+
         <div v-if="error" class="error">
             ⚠️ {{ error }}
         </div>
@@ -848,20 +876,19 @@
                         const todayStartTime = todayStart.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
                         console.log('📅 时间范围：今日 00:00 至', now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
                         
-                        // 增强搜索关键词：国际品牌 + 中国品牌 + 行业词汇
+                        // 精准搜索：只搜索咖啡奶茶行业
                         const searchKeywords = [
-                            // 国际品牌
-                            'starbucks', 'luckin', 'costa', 'nestle',
-                            // 基础词汇
-                            'coffee', 'cafe', 'espresso', 'latte', 'cappuccino',
-                            // 行业词汇
-                            'coffee shop', 'coffee chain', 'coffee industry', 'coffee market',
-                            // 中国相关（拼音和英文）
-                            'china coffee', 'chinese coffee', 'beijing coffee', 'shanghai coffee'
+                            // 咖啡品牌
+                            'starbucks', 'luckin', 'costa', 'nestle coffee', 'blue bottle',
+                            // 奶茶品牌
+                            'bubble tea', 'boba tea', 'milk tea', 'heytea', 'nayuki',
+                            // 核心行业词
+                            'coffee shop', 'coffee chain', 'coffee industry', 'coffee market', 'coffee business',
+                            'tea shop', 'tea chain', 'beverage industry'
                         ];
                         
                         const searchQuery = searchKeywords.join(' OR ');
-                        console.log('🔍 搜索关键词：', searchKeywords.slice(0, 5).join(', ') + '...');
+                        console.log('🔍 搜索关键词：咖啡奶茶行业专属关键词');
                         
                         const response = await axios.get('https://content.guardianapis.com/search', {
                             params: {
@@ -876,11 +903,49 @@
                         });
                         
                         console.log('📡 API 响应状态:', response.status);
-                        console.log('📦 返回结果数:', response.data.response?.results?.length || 0);
+                        const totalResults = response.data.response?.results?.length || 0;
+                        console.log('📦 API返回结果数:', totalResults);
                         
                         if (response.data.response && response.data.response.results && response.data.response.results.length > 0) {
+                            // 行业相关关键词（用于二次过滤）
+                            const industryKeywords = [
+                                // 咖啡相关
+                                'coffee', 'cafe', 'espresso', 'latte', 'cappuccino', 'mocha', 'americano',
+                                'starbucks', 'luckin', 'costa', 'nestle', 'barista', 'roast', 'bean',
+                                // 奶茶相关
+                                'tea', 'bubble tea', 'boba', 'milk tea', 'heytea', 'nayuki', 'tapioca',
+                                // 行业词
+                                'shop', 'chain', 'store', 'beverage', 'drink', 'industry', 'market', 'brand'
+                            ];
+                            
+                            // 排除无关关键词
+                            const excludeKeywords = [
+                                'football', 'soccer', 'cricket', 'rugby', 'tennis',  // 体育
+                                'election', 'vote', 'politician', 'parliament',       // 政治
+                                'war', 'military', 'weapon', 'conflict',             // 军事
+                                'film', 'movie', 'actor', 'actress', 'cinema',       // 电影（除非与咖啡相关）
+                                'novel', 'book', 'author', 'literature'              // 文学（除非与咖啡相关）
+                            ];
+                            
                             const guardianResults = response.data.response.results
-                                .filter(article => article.webTitle)
+                                .filter(article => {
+                                    if (!article.webTitle) return false;
+                                    
+                                    const fullText = (article.webTitle + ' ' + (article.fields?.trailText || '')).toLowerCase();
+                                    
+                                    // 检查是否包含行业关键词
+                                    const hasIndustryKeyword = industryKeywords.some(keyword => 
+                                        fullText.includes(keyword.toLowerCase())
+                                    );
+                                    
+                                    // 检查是否包含排除关键词
+                                    const hasExcludeKeyword = excludeKeywords.some(keyword => 
+                                        fullText.includes(keyword.toLowerCase())
+                                    );
+                                    
+                                    // 只有包含行业关键词且不包含排除关键词的才保留
+                                    return hasIndustryKeyword && !hasExcludeKeyword;
+                                })
                                 .map(article => ({
                                     title: article.webTitle,
                                     url: article.webUrl,
@@ -890,7 +955,10 @@
                                 }));
                             
                             allNews.push(...guardianResults);
-                            console.log(`✅ 成功获取 ${guardianResults.length} 条资讯`);
+                            console.log(`✅ 从 ${totalResults} 条中筛选出 ${guardianResults.length} 条咖啡奶茶行业资讯`);
+                            if (guardianResults.length < totalResults) {
+                                console.log(`🗑️ 已过滤 ${totalResults - guardianResults.length} 条无关资讯`);
+                            }
                             
                             // 保存到缓存
                             try {
