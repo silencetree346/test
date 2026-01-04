@@ -799,59 +799,54 @@
                 async fetchRealNews() {
                     console.log('尝试获取实时资讯...');
                     
-                    // 只使用NewsAPI获取资讯
-                    this.loadingMessage = '正在获取咖啡行业资讯（NewsAPI）...';
+                    // 使用 The Guardian API（完全免费，无域名限制）
+                    this.loadingMessage = '正在获取咖啡行业资讯（The Guardian）...';
                     
                     const allNews = [];
                     
                     try {
-                        const apiKey = '8ba2fe6f879143deaab158a430ad3c10';
+                        const guardianApiKey = 'test'; // The Guardian 允许使用 'test' 作为 API Key
                         
                         const now = new Date();
                         const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
-                        const fromDate = threeDaysAgo.toISOString();
+                        const fromDate = threeDaysAgo.toISOString().split('T')[0];
+                        const toDate = now.toISOString().split('T')[0];
                         
-                        console.log('📅 NewsAPI时间范围：', fromDate, '至', now.toISOString());
+                        console.log('📅 The Guardian API 时间范围：', fromDate, '至', toDate);
                         
-                        const response = await axios.get('https://newsapi.org/v2/everything', {
+                        const response = await axios.get('https://content.guardianapis.com/search', {
                             params: {
-                                q: 'coffee OR starbucks OR luckin OR "coffee industry" OR "coffee market" OR "coffee shop"',
-                                language: 'en',
-                                sortBy: 'publishedAt',
-                                from: fromDate,
-                                pageSize: 50,
-                                apiKey: apiKey
+                                q: 'coffee OR starbucks OR "coffee industry" OR "coffee market"',
+                                'from-date': fromDate,
+                                'to-date': toDate,
+                                'page-size': 50,
+                                'show-fields': 'headline,trailText,thumbnail,shortUrl',
+                                'api-key': guardianApiKey
                             },
                             timeout: 15000
                         });
                         
-                        if (response.data.articles && response.data.articles.length > 0) {
-                            const newsApiResults = response.data.articles
-                                .filter(article => article.title && article.url && !article.title.includes('[Removed]'))
+                        if (response.data.response && response.data.response.results && response.data.response.results.length > 0) {
+                            const guardianResults = response.data.response.results
+                                .filter(article => article.webTitle)
                                 .map(article => ({
-                                    title: article.title,
-                                    url: article.url,
-                                    source: article.source.name,
-                                    publish_date: article.publishedAt.split('T')[0],
-                                    summary: article.description || article.content?.substring(0, 200) || ''
+                                    title: article.webTitle,
+                                    url: article.webUrl,
+                                    source: 'The Guardian',
+                                    publish_date: article.webPublicationDate.split('T')[0],
+                                    summary: article.fields?.trailText || article.webTitle.substring(0, 200)
                                 }));
                             
-                            allNews.push(...newsApiResults);
-                            console.log(`✅ NewsAPI：成功获取 ${newsApiResults.length} 条咖啡行业资讯`);
+                            allNews.push(...guardianResults);
+                            console.log(`✅ The Guardian：成功获取 ${guardianResults.length} 条咖啡行业资讯`);
                         } else {
-                            console.warn('⚠️ NewsAPI返回了0条结果');
+                            console.warn('⚠️ The Guardian 返回了0条结果');
                         }
                     } catch (error) {
-                        console.error('❌ NewsAPI调用失败:', error.message);
+                        console.error('❌ The Guardian API 调用失败:', error.message);
                         if (error.response) {
                             console.error('   HTTP状态码:', error.response.status);
                             console.error('   错误详情:', error.response.data);
-                            
-                            if (error.response.status === 426) {
-                                console.error('   ⚠️ 错误426: 需要HTTPS协议！请通过 http://localhost:8000 访问，不要直接打开HTML文件');
-                            } else if (error.response.status === 429) {
-                                console.error('   ⚠️ 错误429: API配额已用完，请等待明天或更换API Key');
-                            }
                         }
                     }
                     
@@ -867,12 +862,11 @@
                     console.log(`📊 最终获取 ${allNews.length} 条实时资讯`);
                     
                     if (allNews.length === 0) {
-                        console.error('❌ 未能获取任何资讯！');
-                        console.error('💡 可能原因：');
-                        console.error('   1. 直接打开了HTML文件（file://协议） - 请通过 http://localhost:8000 访问');
-                        console.error('   2. NewsAPI配额用完 - 免费版每天100次请求');
-                        console.error('   3. API Key失效');
-                        console.error('💡 解决方案：在终端运行 cd docs && python3 -m http.server 8000，然后访问 http://localhost:8000');
+                        console.warn('⚠️ 未能获取任何资讯');
+                        console.warn('💡 可能原因：');
+                        console.warn('   1. The Guardian 近期没有相关咖啡行业报道');
+                        console.warn('   2. 网络连接问题');
+                        console.warn('   3. API 服务暂时不可用');
                     }
                     
                     return allNews;
@@ -1433,17 +1427,16 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                         
                         if (newsItems.length === 0) {
                             // 没有获取到资讯，显示详细错误信息
-                            this.error = '⚠️ 无法获取咖啡行业资讯\n\n' +
+                            this.error = '⚠️ 过去3天未获取到咖啡行业相关资讯信息\n\n' +
                                 '可能原因：\n' +
-                                '1. NewsAPI 配额已用完（免费版每天100次请求）\n' +
-                                '2. API Key 失效或无效\n' +
-                                '3. 网络连接问题\n\n' +
-                                '💡 解决方案：\n' +
-                                '1. 访问 https://newsapi.org/register 注册新账号获取 API Key\n' +
-                                '2. 检查控制台(F12)查看详细错误信息\n' +
-                                '3. 等待明天配额重置\n\n' +
-                                '📧 联系开发者更换 API Key';
-                            this.statusMessage = '❌ 未获取到资讯';
+                                '1. The Guardian 近期没有相关咖啡行业报道\n' +
+                                '2. 网络连接问题\n' +
+                                '3. API 服务暂时不可用\n\n' +
+                                '💡 建议：\n' +
+                                '• 稍后再试\n' +
+                                '• 检查网络连接\n' +
+                                '• 查看浏览器控制台(F12)的详细错误信息';
+                            this.statusMessage = 'ℹ️ 暂无资讯';
                             this.loading = false;
                             return;
                         }
