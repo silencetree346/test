@@ -672,6 +672,14 @@
                         cleaned = cleaned.replace(new RegExp(entity, 'g'), entities[entity]);
                     });
                     
+                    // 移除作者和编辑信息（多种格式）
+                    cleaned = cleaned.replace(/^作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?/i, '');
+                    cleaned = cleaned.replace(/^编辑\s*[|：:]\s*[^\s|：:]+/i, '');
+                    cleaned = cleaned.replace(/作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?/gi, '');
+                    cleaned = cleaned.replace(/编辑\s*[|：:]\s*[^\s|：:]+/gi, '');
+                    cleaned = cleaned.replace(/\s*[|：:]\s*作者\s*[|：:]\s*[^\s|：:]+/gi, '');
+                    cleaned = cleaned.replace(/\s*[|：:]\s*编辑\s*[|：:]\s*[^\s|：:]+/gi, '');
+                    
                     // 清理多余的空白字符
                     cleaned = cleaned.replace(/\s+/g, ' ').trim();
                     
@@ -1057,6 +1065,10 @@
                                 if (description.includes('&') || description.includes('<') || description.includes('>')) {
                                     description = this.cleanText(description);
                                 }
+                                
+                                // 移除描述开头的作者和编辑信息
+                                description = description.replace(/^作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?\s*/i, '');
+                                description = description.replace(/^编辑\s*[|：:]\s*[^\s|：:]+\s*/i, '');
                                 
                                 if (!title) return;
                                 totalItems++;
