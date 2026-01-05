@@ -1001,6 +1001,7 @@
                 async fetchChineseNews() {
                     console.log('🌐 尝试获取国内资讯...');
                     const allNews = [];
+                    const self = this; // 保存this引用，确保在回调中能正确访问
                     
                     // 方案1：尝试从后端获取（如果已配置）
                     try {
@@ -1031,9 +1032,11 @@
                     try {
                         // 使用公共CORS代理服务访问RSS Feed（多个备选）
                         const corsProxies = [
+                            'https://api.codetabs.com/v1/proxy?quest=',
                             'https://api.allorigins.win/raw?url=',
-                            'https://cors-anywhere.herokuapp.com/',
-                            'https://api.codetabs.com/v1/proxy?quest='
+                            'https://corsproxy.io/?',
+                            'https://thingproxy.freeboard.io/fetch/',
+                            'https://yacdn.org/proxy/'
                         ];
                         
                         // 辅助函数：尝试多个代理
@@ -1042,11 +1045,23 @@
                                 const proxy = corsProxies[i];
                                 try {
                                     console.log(`🔄 ${sourceName}: 尝试代理 ${i + 1}/${corsProxies.length}...`);
-                                    const proxyUrl = proxy === 'https://api.codetabs.com/v1/proxy?quest=' 
-                                        ? proxy + encodeURIComponent(url)
-                                        : proxy + encodeURIComponent(url);
+                                    let proxyUrl;
+                                    if (proxy.includes('codetabs.com')) {
+                                        proxyUrl = proxy + encodeURIComponent(url);
+                                    } else if (proxy.includes('corsproxy.io')) {
+                                        proxyUrl = proxy + encodeURIComponent(url);
+                                    } else if (proxy.includes('thingproxy.freeboard.io')) {
+                                        proxyUrl = proxy + url;
+                                    } else if (proxy.includes('yacdn.org')) {
+                                        proxyUrl = proxy + url;
+                                    } else {
+                                        proxyUrl = proxy + encodeURIComponent(url);
+                                    }
                                     const response = await axios.get(proxyUrl, { 
-                                        timeout: 15000 // 增加到15秒
+                                        timeout: 20000,
+                                        headers: {
+                                            'Accept': 'application/xml, text/xml, */*'
+                                        }
                                     });
                                     console.log(`✅ ${sourceName}: 代理 ${i + 1} 成功`);
                                     return response.data;
@@ -1176,8 +1191,8 @@
                                 let description = item.querySelector('description')?.textContent || '';
                                 
                                 // 解码HTML实体
-                                title = this.cleanText(title);
-                                description = this.cleanText(description);
+                                title = self.cleanText(title);
+                                description = self.cleanText(description);
                                 
                                 // 移除描述开头的作者和编辑信息
                                 description = description.replace(/^作者\s*[|：:]\s*[^\s|：:]+(\s*编辑\s*[|：:]\s*[^\s|：:]+)?\s*/i, '');
@@ -1200,7 +1215,7 @@
                                 
                                 if (hasCoffeeKeyword) {
                                     matchedItems++;
-                                    const summary = this.generateSummary(title, description);
+                                    const summary = self.generateSummary(title, description);
                                     
                                     allNews.push({
                                         title: title,
