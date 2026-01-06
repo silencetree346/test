@@ -194,10 +194,13 @@
         .news-title a {
             color: inherit;
             text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .news-title a:hover {
             color: #667eea;
+            text-decoration: underline;
         }
 
         .news-meta {
@@ -395,7 +398,7 @@
                             <span style="font-size: 24px; margin-right: 10px;">🏢</span>
                             <div>
                                 <div style="font-size: 16px; font-weight: 600;">公司动态</div>
-                                <div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">企业战略、融资并购、业绩财报</div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">上市、收购、战略投资、出海、供应链、财报</div>
                             </div>
                         </div>
                         <div style="background: rgba(255,255,255,0.25); padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 600;">
@@ -403,19 +406,58 @@
                         </div>
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <div v-if="categorizedNews.company.length > 0" class="news-grid">
-                            <div v-for="(news, index) in categorizedNews.company" :key="'company-' + index" class="news-item" style="border-left: 4px solid #3498db;">
-                                <div class="news-title">
-                                    <a :href="news.url" target="_blank">{{ news.title }}</a>
+                        <div v-if="categorizedNews.company.length > 0">
+                            <!-- 国内动态 -->
+                            <div v-if="companyByCountry.domestic.length > 0" style="margin-bottom: 20px;">
+                                <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="display: flex; align-items: center;">
+                                        <span style="margin-right: 8px;">🇨🇳</span>
+                                        <span>国内：喜茶、瑞幸、奈雪、蜜雪冰城、Manner等</span>
+                                    </div>
+                                    <span style="background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 10px; font-size: 12px;">{{ companyByCountry.domestic.length }} 条</span>
                                 </div>
-                                <div class="news-summary">
-                                    {{ news.summary || '该资讯暂无详细摘要，请点击标题查看完整内容。' }}
+                                <div class="news-grid">
+                                    <div v-for="(news, index) in companyByCountry.domestic" :key="'domestic-' + index" class="news-item" style="border-left: 4px solid #e74c3c;">
+                                        <div class="news-title">
+                                            <a :href="news.url" target="_blank">{{ news.title }} <span style="font-size: 0.8em; opacity: 0.6;">🔗</span></a>
+                                        </div>
+                                        <div class="news-summary">
+                                            {{ news.summary || '该资讯暂无详细摘要，请点击标题查看完整内容。' }}
+                                        </div>
+                                        <div class="news-meta">
+                                            <span :class="'source-badge source-' + getSourceClass(news.source)">
+                                                {{ news.source }}
+                                            </span>
+                                            <span>🕒 {{ news.publish_date }}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="news-meta">
-                                    <span :class="'source-badge source-' + getSourceClass(news.source)">
-                                        {{ news.source }}
-                                    </span>
-                                    <span>🕒 {{ news.publish_date }}</span>
+                            </div>
+                            
+                            <!-- 国际动态 -->
+                            <div v-if="companyByCountry.international.length > 0">
+                                <div style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="display: flex; align-items: center;">
+                                        <span style="margin-right: 8px;">🌏</span>
+                                        <span>国际：星巴克、雀巢、Costa、Tim Hortons等</span>
+                                    </div>
+                                    <span style="background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 10px; font-size: 12px;">{{ companyByCountry.international.length }} 条</span>
+                                </div>
+                                <div class="news-grid">
+                                    <div v-for="(news, index) in companyByCountry.international" :key="'international-' + index" class="news-item" style="border-left: 4px solid #3498db;">
+                                        <div class="news-title">
+                                            <a :href="news.url" target="_blank">{{ news.title }} <span style="font-size: 0.8em; opacity: 0.6;">🔗</span></a>
+                                        </div>
+                                        <div class="news-summary">
+                                            {{ news.summary || '该资讯暂无详细摘要，请点击标题查看完整内容。' }}
+                                        </div>
+                                        <div class="news-meta">
+                                            <span :class="'source-badge source-' + getSourceClass(news.source)">
+                                                {{ news.source }}
+                                            </span>
+                                            <span>🕒 {{ news.publish_date }}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -441,7 +483,7 @@
                         <div v-if="categorizedNews.industry.length > 0" class="news-grid">
                             <div v-for="(news, index) in categorizedNews.industry" :key="'industry-' + index" class="news-item" style="border-left: 4px solid #e67e22;">
                                 <div class="news-title">
-                                    <a :href="news.url" target="_blank">{{ news.title }}</a>
+                                    <a :href="news.url" target="_blank">{{ news.title }} <span style="font-size: 0.8em; opacity: 0.6;">🔗</span></a>
                                 </div>
                                 <div class="news-summary">
                                     {{ news.summary || '该资讯暂无详细摘要，请点击标题查看完整内容。' }}
@@ -476,7 +518,7 @@
                         <div v-if="categorizedNews.market.length > 0" class="news-grid">
                             <div v-for="(news, index) in categorizedNews.market" :key="'market-' + index" class="news-item" style="border-left: 4px solid #27ae60;">
                                 <div class="news-title">
-                                    <a :href="news.url" target="_blank">{{ news.title }}</a>
+                                    <a :href="news.url" target="_blank">{{ news.title }} <span style="font-size: 0.8em; opacity: 0.6;">🔗</span></a>
                                 </div>
                                 <div class="news-summary">
                                     {{ news.summary || '该资讯暂无详细摘要，请点击标题查看完整内容。' }}
@@ -532,21 +574,28 @@
                         const text = (news.title + ' ' + (news.summary || '')).toLowerCase();
                         const originalText = news.title + ' ' + (news.summary || '');
                         
-                        // 公司动态关键词：具体公司名（中英文）、CEO、并购、融资、财报、IPO
+                        // 公司动态关键词：聚焦公司级别重大动态
                         const companyKeywords = [
-                            // 英文公司名
-                            'starbucks', 'luckin', 'nestle', 'costa', 'tim hortons', 'dunkin', 'peet', 'blue bottle', 'lavazza', 'illy',
-                            // 中文公司名
-                            '星巴克', '瑞幸', '雀巢', 'costa', 'manner', 'seesaw', 'm stand', 'tims', '挪瓦', 'manner coffee',
-                            '连咖啡', '三顿半', '永璞', '隅田川', '时萃', 'fisheye', '鱼眼咖啡',
-                            // 公司行为关键词（英文）
-                            'ceo', 'merger', 'acquisition', 'invest', 'ipo', 'earnings', 'revenue', 'profit', 
-                            'expansion', 'opens', 'closes', 'launch', 'announces', 'strategy', 'scandal', 'comeback',
-                            'quarterly', 'financial', 'funding', 'round', 'valuation', 'partnership', 'cooperation',
-                            // 公司行为关键词（中文）
-                            '宣布', '发布', '财报', '营收', '利润', '融资', '投资', '并购', '收购', 'ipo', '上市',
-                            '开店', '关店', '扩张', '战略', '合作', '推出', '上线', '发布', 'ceo', '总裁', '董事长',
-                            '门店数', '业绩', '增长', '亏损', '盈利', '估值', '轮融资', '战略融资', 'a轮', 'b轮', 'c轮'
+                            // 咖啡行业关键竞品（中英文）
+                            'starbucks', 'luckin', 'nestle', 'costa', 'tim hortons', 'tims', 'dunkin', "peet's", 'blue bottle', 
+                            'lavazza', 'illy', 'manner', 'seesaw', 'm stand', '挪瓦', 'manner coffee',
+                            '星巴克', '瑞幸', '雀巢', '三顿半', '永璞', '隅田川', '时萃', 'fisheye', '鱼眼咖啡', '连咖啡',
+                            // 奶茶行业关键竞品（中英文）
+                            '喜茶', 'heytea', '奈雪', 'nayuki', '茶百道', '古茗', '蜜雪冰城', 'mixue', '书亦烧仙草',
+                            '茶颜悦色', 'chabaidao', '霸王茶姬', '沪上阿姨', '一点点', '7分甜', 'coco', '益禾堂',
+                            // 重大事件关键词（上市、收购、战略投资）
+                            'ipo', '上市', '挂牌', 'listing', 'merger', 'acquisition', '并购', '收购', '被收购', '兼并',
+                            '战略投资', '投资', '融资', 'investment', 'funding', 'round', 'valuation', '估值',
+                            'a轮', 'b轮', 'c轮', 'd轮', 'pre-ipo', '战略融资', 'series a', 'series b', 'series c',
+                            // 出海计划
+                            '出海', '海外', '国际化', 'overseas', 'expansion', 'global', 'international', 'opens in',
+                            '进军', '开拓', '扩张', '布局海外', '海外市场', '全球化', '跨境',
+                            // 供应链计划
+                            '供应链', '供应商', 'supply chain', 'supplier', '战略合作', '签约', '合作协议',
+                            '采购', '原料', '产地', '基地', '工厂', '生产线', 'partnership', 'cooperation',
+                            // 财报
+                            '财报', 'earnings', 'quarterly', 'revenue', '营收', '业绩', 'profit', '利润', 
+                            '财务', 'financial', '季报', '年报', 'q1', 'q2', 'q3', 'q4', '财务报告', '盈利'
                         ];
                         
                         // 行业趋势关键词：报告、研究、趋势、增长、技术、创新
@@ -581,8 +630,15 @@
                         let companyScore = 0, industryScore = 0, marketScore = 0;
                         
                         // 优先检查公司名（权重更高）
-                        const companyNames = ['星巴克', '瑞幸', 'luckin', 'starbucks', 'manner', '雀巢', 'nestle', 
-                                             'costa', 'tims', 'seesaw', 'm stand', '挪瓦', '三顿半', '永璞'];
+                        const companyNames = [
+                            // 咖啡品牌
+                            '星巴克', 'starbucks', '瑞幸', 'luckin', 'manner', '雀巢', 'nestle', 
+                            'costa', 'tims', 'seesaw', 'm stand', '挪瓦', '三顿半', '永璞', 
+                            '隅田川', '时萃', 'fisheye', 'blue bottle', 'lavazza', 'dunkin',
+                            // 奶茶品牌
+                            '喜茶', 'heytea', '奈雪', 'nayuki', '茶百道', '古茗', '蜜雪冰城', 'mixue',
+                            '书亦烧仙草', '茶颜悦色', '霸王茶姬', '沪上阿姨', '一点点', '7分甜', 'coco', '益禾堂'
+                        ];
                         const hasCompanyName = companyNames.some(name => 
                             originalText.includes(name) || text.includes(name.toLowerCase())
                         );
@@ -633,6 +689,61 @@
                     });
                     
                     return { company, industry, market };
+                },
+                
+                // 按国家分类公司动态
+                companyByCountry() {
+                    if (!this.categorizedNews || !this.categorizedNews.company) {
+                        return { domestic: [], international: [] };
+                    }
+                    
+                    const domestic = [];
+                    const international = [];
+                    
+                    // 国内品牌关键词
+                    const domesticCompanies = [
+                        // 咖啡品牌
+                        '瑞幸', 'luckin', 'manner', 'seesaw', 'm stand', '三顿半', '永璞', '隅田川', 
+                        '时萃', 'fisheye', '鱼眼咖啡', '连咖啡', '挪瓦',
+                        // 奶茶品牌
+                        '喜茶', 'heytea', '奈雪', 'nayuki', '茶百道', '古茗', '蜜雪冰城', 'mixue', 
+                        '书亦烧仙草', '茶颜悦色', 'chabaidao', '霸王茶姬', '沪上阿姨', '益禾堂',
+                        // 其他国内关键词
+                        '中国', '国内', 'china', 'chinese'
+                    ];
+                    
+                    // 国际品牌关键词
+                    const internationalCompanies = [
+                        'starbucks', '星巴克', 'nestle', '雀巢', 'costa', 'tim hortons', 'tims', 
+                        'dunkin', "peet's", 'blue bottle', 'lavazza', 'illy', 'nespresso',
+                        '一点点', '7分甜', 'coco'  // 台湾品牌归为国际
+                    ];
+                    
+                    this.categorizedNews.company.forEach(news => {
+                        const text = (news.title + ' ' + (news.summary || '')).toLowerCase();
+                        const originalText = news.title + ' ' + (news.summary || '');
+                        
+                        // 检查是否包含国内品牌
+                        const isDomestic = domesticCompanies.some(brand => 
+                            text.includes(brand.toLowerCase()) || originalText.includes(brand)
+                        );
+                        
+                        // 检查是否包含国际品牌
+                        const isInternational = internationalCompanies.some(brand => 
+                            text.includes(brand.toLowerCase()) || originalText.includes(brand)
+                        );
+                        
+                        if (isDomestic) {
+                            domestic.push(news);
+                        } else if (isInternational) {
+                            international.push(news);
+                        } else {
+                            // 默认归为国内（因为数据源主要是国内）
+                            domestic.push(news);
+                        }
+                    });
+                    
+                    return { domestic, international };
                 }
             },
             methods: {
@@ -1426,10 +1537,16 @@
                         // 尝试解析JSON
                         const newsData = JSON.parse(aiContent.trim());
                         
+                        // 辅助函数：根据标题生成搜索链接
+                        const generateSearchUrl = (title) => {
+                            const keywords = title.replace(/[，。、！？：；""''（）]/g, ' ');
+                            return `https://www.baidu.com/s?tn=news&word=${encodeURIComponent(keywords)}`;
+                        };
+                        
                         // 转换为统一格式
                         return newsData.map((item, index) => ({
                             title: item.title,
-                            url: '#',
+                            url: generateSearchUrl(item.title),
                             source: 'AI生成',
                             publish_date: new Date().toISOString().split('T')[0],
                             summary: item.summary
@@ -1445,73 +1562,82 @@
                 getPresetFallbackNews() {
                     // 预设的备用资讯数据
                     const today = new Date().toISOString().split('T')[0];
+                    
+                    // 辅助函数：根据标题生成搜索链接
+                    const generateSearchUrl = (title) => {
+                        // 提取关键词（去除标点符号）
+                        const keywords = title.replace(/[，。、！？：；""''（）]/g, ' ');
+                        // 使用百度新闻搜索
+                        return `https://www.baidu.com/s?tn=news&word=${encodeURIComponent(keywords)}`;
+                    };
+                    
                     return [
                         {
                             title: '瑞幸咖啡Q4财报超预期，门店数突破18000家',
-                            url: '#',
+                            url: generateSearchUrl('瑞幸咖啡 Q4财报 门店'),
                             source: '财经资讯',
                             publish_date: today,
                             summary: '瑞幸咖啡发布最新财报，第四季度营收同比增长85%，门店总数突破18000家，继续领跑中国咖啡市场。'
                         },
                         {
                             title: '星巴克推出新年限定系列，强化中国市场布局',
-                            url: '#',
+                            url: generateSearchUrl('星巴克 新年限定 中国市场'),
                             source: '品牌动态',
                             publish_date: today,
                             summary: '星巴克在中国市场推出新年限定饮品和周边产品，加强本土化策略，计划2025年新增1000家门店。'
                         },
                         {
                             title: '喜茶完成新一轮融资，估值达到600亿元',
-                            url: '#',
+                            url: generateSearchUrl('喜茶 融资 估值'),
                             source: '投资快讯',
                             publish_date: today,
                             summary: '新茶饮品牌喜茶完成新一轮战略融资，投后估值达到600亿元，将加速海外市场拓展和供应链建设。'
                         },
                         {
                             title: '咖啡豆价格持续上涨，行业成本压力加大',
-                            url: '#',
+                            url: generateSearchUrl('咖啡豆价格 上涨'),
                             source: '市场分析',
                             publish_date: today,
                             summary: '受气候变化和产量下降影响，阿拉比卡咖啡豆价格创近十年新高，咖啡品牌面临成本上涨压力。'
                         },
                         {
                             title: 'Manner Coffee获得新一轮融资，估值突破30亿美元',
-                            url: '#',
+                            url: generateSearchUrl('Manner Coffee 融资'),
                             source: '融资动态',
                             publish_date: today,
                             summary: '精品咖啡品牌Manner Coffee完成新一轮融资，估值突破30亿美元，将加速全国扩张和产品研发。'
                         },
                         {
                             title: '奈雪的茶推出咖啡新品线，进军咖啡市场',
-                            url: '#',
+                            url: generateSearchUrl('奈雪的茶 咖啡新品'),
                             source: '产品创新',
                             publish_date: today,
                             summary: '奈雪的茶正式推出咖啡产品线，涵盖美式、拿铁等多款产品，进军千亿咖啡市场，与喜茶形成竞争。'
                         },
                         {
                             title: '全球咖啡消费量稳步增长，中国市场增速最快',
-                            url: '#',
+                            url: generateSearchUrl('全球咖啡消费 中国市场'),
                             source: '行业报告',
                             publish_date: today,
                             summary: '国际咖啡组织数据显示，全球咖啡消费量年增长率3%，中国市场以15%的增速领跑，潜力巨大。'
                         },
                         {
                             title: '即饮咖啡市场爆发，便利店成为新战场',
-                            url: '#',
+                            url: generateSearchUrl('即饮咖啡 便利店'),
                             source: '渠道观察',
                             publish_date: today,
                             summary: '即饮咖啡市场规模突破200亿元，便利店咖啡销量大增，7-11、全家等加速布局现制咖啡业务。'
                         },
                         {
                             title: '咖啡品牌加速数字化转型，私域流量成关键',
-                            url: '#',
+                            url: generateSearchUrl('咖啡品牌 数字化转型 私域流量'),
                             source: '数字营销',
                             publish_date: today,
                             summary: '头部咖啡品牌纷纷加强数字化建设，通过小程序、会员体系等构建私域流量池，提升用户粘性。'
                         },
                         {
                             title: '植物基咖啡受追捧，健康趋势引领产品创新',
-                            url: '#',
+                            url: generateSearchUrl('植物基咖啡 健康趋势'),
                             source: '消费趋势',
                             publish_date: today,
                             summary: '燕麦奶、椰奶等植物基咖啡产品销量大增，健康、环保理念推动咖啡品类创新，市场规模快速增长。'
@@ -2768,8 +2894,8 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                         if (newsItems.length === 0) {
                             // 未获取到实时资讯，尝试使用AI生成备用资讯
                             console.log('⚠️ 未获取到实时资讯，使用AI生成备用资讯...');
-                            this.statusMessage = '🤖 正在生成AI备用资讯...';
-                            this.loadingMessage = '正在使用AI生成过去24小时资讯...';
+                            this.statusMessage = '🤖 正在生成备用资讯...';
+                            this.loadingMessage = '正在生成过去24小时关键词资讯...';
                             
                             try {
                                 const aiNews = await this.generateAIFallbackNews();
@@ -2827,7 +2953,7 @@ H3：下沉市场规模是一二线的1.8倍，但渗透率仅为1/3
                         
                         // 根据数据来源显示不同的提示信息
                         if (hasAIGenerated) {
-                            this.statusMessage = `🤖 已生成 ${newsItems.length} 条AI资讯（基于过去24小时行业知识）· ${collectTime}`;
+                            this.statusMessage = `🤖 已生成 ${newsItems.length} 条资讯信息（基于过去24小时关键词搜索）· ${collectTime}`;
                         } else {
                             this.statusMessage = `✅ 成功获取 ${newsItems.length} 条实时资讯（今日0点后）· ${collectTime}`;
                         }
