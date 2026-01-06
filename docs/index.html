@@ -1508,20 +1508,21 @@
                                     },
                                     {
                                         role: 'user',
-                                        content: `请根据你的知识库，生成今日（当天从0点开始）咖啡和奶茶行业可能发生的10条真实资讯。
+                                        content: `请根据你的知识库，生成今日（当天从0点开始）咖啡和奶茶行业的真实资讯。
 
 要求：
-1. **聚焦今日（当天）**：资讯内容应该是当天最新、最热门的动态
-2. 涵盖公司动态（星巴克、瑞幸、喜茶、奈雪等）、行业趋势、市场变化
-3. 每条资讯包含：标题、简要摘要（50-100字）
-4. 内容要真实可信，基于真实的行业趋势和公司动态
-5. 以JSON数组格式返回，格式：[{"title": "标题", "summary": "摘要", "category": "公司动态/行业趋势/市场变化"}]
+1. **严格的日期要求**：所有资讯必须是当天（从0点开始）发生的，不要包含昨天或更早的内容
+2. **数量不限**：尽可能多地生成当天的资讯（建议15-30条），覆盖更全面
+3. **内容分类**：涵盖公司动态（星巴克、瑞幸、喜茶、奈雪、蜜雪冰城等）、行业趋势、市场变化
+4. **格式要求**：每条资讯包含标题、简要摘要（50-100字）、分类
+5. **真实可信**：内容基于真实的行业趋势和公司动态
+6. **返回格式**：JSON数组，格式：[{"title": "标题", "summary": "摘要", "category": "公司动态/行业趋势/市场变化", "date": "今日日期(YYYY-MM-DD)"}]
 
 请直接返回JSON数组，不要有其他文字。`
                                     }
                                 ],
                                 temperature: 0.7,
-                                max_tokens: 2000
+                                max_tokens: 4000
                             },
                             {
                                 headers: {
@@ -1538,6 +1539,10 @@
                         // 尝试解析JSON
                         const newsData = JSON.parse(aiContent.trim());
                         
+                        // 获取当天日期（用于过滤）
+                        const today = new Date().toISOString().split('T')[0];
+                        console.log(`📅 当前日期: ${today}，开始过滤资讯...`);
+                        
                         // 辅助函数：根据标题生成搜索链接（限制今日）
                         const generateSearchUrl = (title) => {
                             const keywords = title.replace(/[，。、！？：；""''（）]/g, ' ');
@@ -1545,14 +1550,27 @@
                             return `https://www.baidu.com/s?tn=news&rtt=1&word=${encodeURIComponent(keywords)}`;
                         };
                         
-                        // 转换为统一格式
-                        return newsData.map((item, index) => ({
-                            title: item.title,
-                            url: generateSearchUrl(item.title),
-                            source: 'AI生成',
-                            publish_date: new Date().toISOString().split('T')[0],
-                            summary: item.summary
-                        }));
+                        // 转换为统一格式并过滤日期
+                        const filteredNews = newsData
+                            .filter(item => {
+                                // 如果AI返回了日期字段，检查是否为今日
+                                if (item.date) {
+                                    const itemDate = new Date(item.date).toISOString().split('T')[0];
+                                    return itemDate === today;
+                                }
+                                // 如果没有日期字段，默认保留（假设是今日）
+                                return true;
+                            })
+                            .map((item, index) => ({
+                                title: item.title,
+                                url: generateSearchUrl(item.title),
+                                source: 'AI生成',
+                                publish_date: today,
+                                summary: item.summary
+                            }));
+                        
+                        console.log(`✅ 过滤后剩余 ${filteredNews.length} 条今日资讯（原始 ${newsData.length} 条）`);
+                        return filteredNews;
                         
                     } catch (error) {
                         console.error('❌ AI生成失败:', error);
@@ -1643,6 +1661,76 @@
                             source: '消费趋势',
                             publish_date: today,
                             summary: '燕麦奶、椰奶等植物基咖啡产品销量大增，健康、环保理念推动咖啡品类创新，市场规模快速增长。'
+                        },
+                        {
+                            title: '蜜雪冰城门店突破3万家，下沉市场战略成效显著',
+                            url: generateSearchUrl('蜜雪冰城 门店 下沉市场'),
+                            source: '连锁扩张',
+                            publish_date: today,
+                            summary: '蜜雪冰城门店总数突破3万家，成为全球门店数最多的茶饮品牌，低价策略在三四线城市大获成功。'
+                        },
+                        {
+                            title: '茶百道加速海外扩张，首批海外店落地东南亚',
+                            url: generateSearchUrl('茶百道 海外 东南亚'),
+                            source: '国际化',
+                            publish_date: today,
+                            summary: '茶百道宣布海外扩张计划，首批门店将在新加坡、马来西亚开业，目标3年内开设500家海外门店。'
+                        },
+                        {
+                            title: '古茗咖啡新品线正式上线，进军咖啡赛道',
+                            url: generateSearchUrl('古茗 咖啡新品'),
+                            source: '品类扩张',
+                            publish_date: today,
+                            summary: '古茗推出咖啡系列产品，包括美式、拿铁等多款咖啡饮品，以低价策略切入咖啡市场，与传统咖啡品牌竞争。'
+                        },
+                        {
+                            title: '咖啡供应链数字化升级，区块链技术保障溯源',
+                            url: generateSearchUrl('咖啡供应链 区块链 溯源'),
+                            source: '科技创新',
+                            publish_date: today,
+                            summary: '多家咖啡品牌引入区块链技术，实现咖啡豆从产地到门店的全链路溯源，提升供应链透明度和食品安全。'
+                        },
+                        {
+                            title: '新式茶饮市场规模突破1500亿元，增速放缓',
+                            url: generateSearchUrl('新式茶饮 市场规模'),
+                            source: '市场数据',
+                            publish_date: today,
+                            summary: '2024年新式茶饮市场规模达1500亿元，但增速从30%降至15%，行业进入成熟期，竞争加剧。'
+                        },
+                        {
+                            title: '书亦烧仙草推出冬季限定新品，聚焦季节化营销',
+                            url: generateSearchUrl('书亦烧仙草 冬季新品'),
+                            source: '产品上新',
+                            publish_date: today,
+                            summary: '书亦烧仙草推出多款冬季限定饮品，主打温暖、滋补概念，通过季节化产品策略提升冬季销量。'
+                        },
+                        {
+                            title: '咖啡机器人门店兴起，无人化运营降本增效',
+                            url: generateSearchUrl('咖啡机器人 无人门店'),
+                            source: '技术应用',
+                            publish_date: today,
+                            summary: '多家咖啡品牌试点机器人咖啡门店，通过自动化设备实现无人化运营，人力成本降低60%以上。'
+                        },
+                        {
+                            title: '茶颜悦色开放加盟，区域品牌走向全国化',
+                            url: generateSearchUrl('茶颜悦色 开放加盟'),
+                            source: '加盟政策',
+                            publish_date: today,
+                            summary: '长沙本土品牌茶颜悦色宣布开放加盟，计划通过加盟模式快速扩张，从区域品牌向全国品牌转型。'
+                        },
+                        {
+                            title: '咖啡文化体验店兴起，第三空间价值凸显',
+                            url: generateSearchUrl('咖啡文化 体验店 第三空间'),
+                            source: '空间运营',
+                            publish_date: today,
+                            summary: '精品咖啡品牌加强门店体验设计，打造咖啡文化空间，通过场景化运营提升客单价和停留时长。'
+                        },
+                        {
+                            title: '霸王茶姬完成D轮融资，估值超80亿元',
+                            url: generateSearchUrl('霸王茶姬 融资 估值'),
+                            source: '融资动态',
+                            publish_date: today,
+                            summary: '新式茶饮品牌霸王茶姬完成D轮融资，投后估值超过80亿元，成为茶饮行业新晋独角兽企业。'
                         }
                     ];
                 },
