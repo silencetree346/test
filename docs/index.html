@@ -557,7 +557,10 @@
                     loadingMessage: '正在获取今日实时资讯...',
                     // AI API配置（可选，用于生成备用资讯）
                     AI_API_KEY: '', // 留空则使用免费方案
-                    AI_API_BASE: 'https://api.deepseek.com'
+                    AI_API_BASE: 'https://api.deepseek.com',
+                    // NewsAPI配置（用于获取真实资讯）
+                    NEWS_API_KEY: '', // 请在 https://newsapi.org 注册获取API Key
+                    NEWS_API_BASE: 'https://newsapi.org/v2'
                 };
             },
             computed: {
@@ -1624,8 +1627,104 @@
                     }
                 },
                 
-                getPresetFallbackNews() {
-                    // 预设的备用资讯数据
+                async fetchFromNewsAPI() {
+                    // 从NewsAPI获取真实的最新资讯
+                    console.log('🔍 正在从NewsAPI获取真实资讯...');
+                    
+                    const today = new Date().toISOString().split('T')[0];
+                    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                    
+                    // 定义35家目标公司的搜索关键词
+                    const companies = [
+                        // 咖啡品牌
+                        'Starbucks', 'Luckin Coffee', 'Manner Coffee', 'Nestle Coffee', 'Costa Coffee',
+                        'Tim Hortons', 'Dunkin', 'Peets Coffee', 'Blue Bottle', 'Lavazza',
+                        'Cotti Coffee', 'Seesaw Coffee',
+                        // 奶茶品牌
+                        'Heytea', 'Nayuki', 'Mixue', 'Chabaidao', 'Guming',
+                        'Chayan Yuese', 'Bawang Chaji'
+                    ];
+                    
+                    const allNews = [];
+                    
+                    // 为每类事件获取最新一条资讯
+                    const eventTypes = [
+                        { keywords: 'IPO OR listing OR stock', category: '上市IPO', limit: 2 },
+                        { keywords: 'acquisition OR merger', category: '并购收购', limit: 2 },
+                        { keywords: 'funding OR investment OR financing', category: '战略投资', limit: 3 },
+                        { keywords: 'expansion OR international OR overseas', category: '出海国际化', limit: 3 },
+                        { keywords: 'supply chain OR supplier OR partnership', category: '供应链合作', limit: 2 },
+                        { keywords: 'earnings OR revenue OR quarterly OR financial', category: '财报发布', limit: 2 },
+                        { keywords: 'new product OR launch OR limited edition', category: '新品发布', limit: 3 },
+                        { keywords: 'store opening OR new store OR expansion', category: '门店扩张', limit: 4 }
+                    ];
+                    
+                    for (const event of eventTypes) {
+                        try {
+                            // 构建搜索查询：(公司1 OR 公司2 OR ...) AND (事件关键词)
+                            const companyQuery = companies.slice(0, 10).join(' OR '); // 限制公司数量避免URL过长
+                            const query = `(${companyQuery}) AND (${event.keywords}) AND (coffee OR tea)`;
+                            
+                            const url = `${this.NEWS_API_BASE}/everything?` +
+                                `q=${encodeURIComponent(query)}&` +
+                                `from=${yesterday}&` +
+                                `to=${today}&` +
+                                `sortBy=publishedAt&` +
+                                `pageSize=${event.limit}&` +
+                                `language=en&` +
+                                `apiKey=${this.NEWS_API_KEY}`;
+                            
+                            const response = await axios.get(url, { timeout: 10000 });
+                            
+                            if (response.data && response.data.articles) {
+                                const articles = response.data.articles.slice(0, event.limit);
+                                
+                                articles.forEach(article => {
+                                    if (article.title && article.url) {
+                                        allNews.push({
+                                            title: article.title,
+                                            url: article.url, // 直接链接到原文
+                                            source: event.category,
+                                            publish_date: article.publishedAt ? article.publishedAt.split('T')[0] : today,
+                                            summary: article.description || article.title
+                                        });
+                                    }
+                                });
+                                
+                                console.log(`✅ ${event.category}: 获取 ${articles.length} 条`);
+                            }
+                        } catch (error) {
+                            console.warn(`⚠️ ${event.category} 获取失败:`, error.message);
+                        }
+                        
+                        // 避免请求过快
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                    
+                    // 按发布时间排序，最新的在前
+                    allNews.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+                    
+                    console.log(`📊 NewsAPI共获取 ${allNews.length} 条真实资讯`);
+                    return allNews;
+                },
+                
+                async getPresetFallbackNews() {
+                    // 优先尝试从NewsAPI获取真实资讯
+                    if (this.NEWS_API_KEY) {
+                        try {
+                            const realNews = await this.fetchFromNewsAPI();
+                            if (realNews && realNews.length > 0) {
+                                console.log(`✅ 从NewsAPI获取到 ${realNews.length} 条真实资讯`);
+                                return realNews;
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ NewsAPI调用失败，使用预设数据:', error.message);
+                        }
+                    } else {
+                        console.log('ℹ️ 未配置NewsAPI Key，使用预设数据');
+                    }
+                    
+                    // 预设的备用资讯数据（静态数据）
                     const today = new Date().toISOString().split('T')[0];
                     
                     // 辅助函数：根据标题生成搜索链接（限制今日）
